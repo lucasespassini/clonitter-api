@@ -1,5 +1,5 @@
 import { Comment } from 'src/modules/comments/entities/comment.entity';
-import { Friend } from 'src/modules/friends/entities/friend.entity';
+import { Friendship } from 'src/modules/friendships/entities/friendship.entity';
 import { Post } from 'src/modules/posts/entities/post.entity';
 import {
   Entity,
@@ -35,6 +35,6 @@ export class User {
   comments: Comment[];
 
   @JoinColumn()
-  @OneToMany(() => Friend, (friend) => friend.user)
-  friends: Friend[];
+  @OneToMany(() => Friendship, (friendship) => friendship.user)
+  friendships: Friendship[];
 }

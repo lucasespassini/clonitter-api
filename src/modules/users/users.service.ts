@@ -115,11 +115,8 @@ export class UsersService {
         name: true,
         email: true,
         password: false,
-        friends: true,
-        comments: true,
-        posts: true,
       },
-      relations: ['posts', 'comments', 'friends'],
+      relations: ['posts', 'comments', 'friendships'],
     });
     return users;
   }

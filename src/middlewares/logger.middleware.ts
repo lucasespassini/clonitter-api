@@ -4,7 +4,7 @@ import { verify } from 'jsonwebtoken';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
-  private secret = '9uj21=09rj210´rj';
+  private secret = process.env.JWT_SECRET;
   use(req: Request, res: Response, next: NextFunction) {
     const authToken = req.headers['authorization'];
     if (authToken != undefined) {

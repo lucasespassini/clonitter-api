@@ -17,16 +17,16 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { UsersController } from './modules/users/users.controller';
 import { PostsController } from './modules/posts/posts.controller';
 import { CommentsController } from './modules/comments/comments.controller';
-import { FriendsModule } from './modules/friends/friends.module';
-import { Friend } from './modules/friends/entities/friend.entity';
 import { ConfigModule } from '@nestjs/config';
+import { FriendshipsModule } from './modules/friendships/friendships.module';
+import { Friendship } from './modules/friendships/entities/friendship.entity';
 
 @Module({
   imports: [
     UsersModule,
     PostsModule,
     CommentsModule,
-    FriendsModule,
+    FriendshipsModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -35,7 +35,7 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User, Post, Comment, Friend],
+      entities: [User, Post, Comment, Friendship],
       synchronize: true,
     }),
   ],
