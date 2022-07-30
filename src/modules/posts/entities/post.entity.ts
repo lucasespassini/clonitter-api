@@ -3,6 +3,7 @@ import { User } from 'src/modules/users/entities/user.entity';
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -22,6 +23,7 @@ export class Post {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: string;
 
+  @JoinColumn()
   @ManyToOne(() => User, (user) => user.posts, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

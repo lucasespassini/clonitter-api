@@ -11,6 +11,8 @@ export class PostsService {
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async create(createPostDto: CreatePostDto) {
@@ -30,6 +32,39 @@ export class PostsService {
     });
 
     return posts;
+  }
+
+  async findAllFriendPosts(id: number) {
+    const posts = [];
+
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['posts', 'friendships'],
+    });
+
+    for (const post of user.posts) {
+      posts.push(post);
+    }
+
+    for (const friendship of user.friendships) {
+      const friendPosts = await this.postRepository
+        .createQueryBuilder('posts')
+        .innerJoinAndSelect('posts.user', 'user')
+        .where('user.id = :followerId', { followerId: friendship.followerId })
+        .getMany();
+
+      friendPosts.forEach((post) => posts.push(post));
+    }
+
+    return posts.sort((a, b) => {
+      if (a.id < b.id) {
+        return 1;
+      }
+      if (a.id > b.id) {
+        return -1;
+      }
+      return 0;
+    });
   }
 
   async findOne(id: number) {

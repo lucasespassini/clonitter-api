@@ -35,7 +35,14 @@ export class FriendshipsService {
       throw new BadRequestException();
     }
 
-    return this.friendshipRepository.save(createFriendshipDto);
+    const user = new User();
+    const friendship = new Friendship();
+
+    user.id = createFriendshipDto.userId;
+    friendship.followerId = createFriendshipDto.followerId;
+    friendship.user = user;
+
+    return this.friendshipRepository.save(friendship);
   }
 
   findAll() {
