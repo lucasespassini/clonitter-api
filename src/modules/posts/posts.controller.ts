@@ -25,6 +25,11 @@ export class PostsController {
     return this.postsService.findAll();
   }
 
+  @Get('user/:id')
+  findAllPostsByUserId(@Param('id') id: string) {
+    return this.postsService.findAllPostsByUserId(+id);
+  }
+
   @Get('user/:id/friends')
   findAllPostsFromFriends(@Param('id') id: string) {
     return this.postsService.findAllFriendPosts(+id);

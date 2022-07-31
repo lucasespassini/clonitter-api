@@ -34,6 +34,20 @@ export class PostsService {
     return posts;
   }
 
+  async findAllPostsByUserId(id: number) {
+    const user = await this.userRepository.findOneBy({ id });
+
+    if (!user) throw new NotFoundException(`Usuário ${id} não existe!`);
+
+    const posts = await this.postRepository
+      .createQueryBuilder('posts')
+      .innerJoinAndSelect('posts.user', 'user')
+      .where('user.id = :id', { id })
+      .getMany();
+
+    return posts;
+  }
+
   async findAllFriendPosts(id: number) {
     const posts = [];
 
@@ -69,7 +83,7 @@ export class PostsService {
 
   async findOne(id: number) {
     const post = await this.postRepository.findOne({
-      where: { id: id },
+      where: { id },
       relations: ['comments'],
     });
 
