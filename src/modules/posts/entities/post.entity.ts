@@ -30,6 +30,7 @@ export class Post {
   })
   user: User;
 
+  @JoinColumn()
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
 }

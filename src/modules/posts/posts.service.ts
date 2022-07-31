@@ -43,6 +43,8 @@ export class PostsService {
       .createQueryBuilder('posts')
       .innerJoinAndSelect('posts.user', 'user')
       .where('user.id = :id', { id })
+      .leftJoinAndSelect('posts.comments', 'comments')
+      // .where('post.id = comments.postId')
       .getMany();
 
     return posts;
