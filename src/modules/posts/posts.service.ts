@@ -44,7 +44,7 @@ export class PostsService {
       .innerJoinAndSelect('posts.user', 'user')
       .where('user.id = :id', { id })
       .leftJoinAndSelect('posts.comments', 'comments')
-      // .where('post.id = comments.postId')
+      .orderBy('posts.id', 'DESC')
       .getMany();
 
     return posts;
