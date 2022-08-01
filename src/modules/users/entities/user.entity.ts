@@ -9,10 +9,15 @@ import {
   JoinColumn,
 } from 'typeorm';
 
+import { v4 as uuidv4 } from 'uuid';
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: 'uuid', unique: true, default: uuidv4() })
+  uuid: string;
 
   @Column({ length: 50, unique: true })
   user_name: string;

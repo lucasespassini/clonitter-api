@@ -9,6 +9,9 @@ export class Friendship {
   @Column()
   followerId: number;
 
-  @ManyToOne(() => User, (user) => user.friendships)
+  @ManyToOne(() => User, (user) => user.friendships, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   user: User;
 }
