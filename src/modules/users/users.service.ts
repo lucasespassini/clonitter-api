@@ -97,6 +97,7 @@ export class UsersService {
     const token = sign(
       {
         id: user.id,
+        uuid: user.uuid,
         user_name: user.user_name,
         name: user.name,
         email: user.email,
@@ -111,6 +112,7 @@ export class UsersService {
     const users = await this.userRepository.find({
       select: {
         id: true,
+        uuid: true,
         user_name: true,
         name: true,
         email: true,
@@ -126,13 +128,13 @@ export class UsersService {
       where: { id: id },
       select: {
         id: true,
+        uuid: true,
         user_name: true,
         name: true,
         email: true,
         password: false,
-        posts: true,
       },
-      relations: ['posts', 'friends'],
+      relations: ['posts', 'comments', 'friendships'],
     });
 
     if (!user) {
