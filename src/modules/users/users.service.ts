@@ -176,6 +176,7 @@ export class UsersService {
     const token = sign(
       {
         id: user.id,
+        uuid: user.uuid,
         user_name: user.user_name,
         name: user.name,
         email: user.email,
