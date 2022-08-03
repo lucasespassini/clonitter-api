@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
@@ -16,13 +20,12 @@ export class PostsService {
   ) {}
 
   async create(createPostDto: CreatePostDto) {
-    const post = new Post();
-    const user = new User();
-    post.content = createPostDto.content;
-    user.id = +createPostDto.userId;
-    post.user = user;
-    await this.postRepository.save(post);
-    return { msg: 'Post criado com sucesso!' };
+    try {
+      const newPost = this.postRepository.create(createPostDto);
+      return this.postRepository.save(newPost);
+    } catch (error) {
+      throw new BadRequestException({ error: error['sqlMessage'] });
+    }
   }
 
   async findAll() {

@@ -3,6 +3,7 @@ import { User } from 'src/modules/users/entities/user.entity';
 import {
   Column,
   Entity,
+  Generated,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -14,7 +15,8 @@ export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @PrimaryGeneratedColumn('uuid')
+  @Generated('uuid')
+  @Column()
   uuid: string;
 
   @Column()

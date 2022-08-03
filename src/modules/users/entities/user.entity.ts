@@ -7,6 +7,7 @@ import {
   Column,
   OneToMany,
   JoinColumn,
+  Generated,
 } from 'typeorm';
 
 @Entity('users')
@@ -14,7 +15,8 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @PrimaryGeneratedColumn('uuid')
+  @Generated('uuid')
+  @Column()
   uuid: string;
 
   @Column({ length: 50, unique: true })
