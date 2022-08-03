@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -27,23 +27,37 @@ export class CommentsService {
     comment.user = user;
     comment.post = post;
 
-    await this.commentRepository.save(comment);
-    return { msg: 'Comentário criado com sucesso!' };
+    return this.commentRepository.save(comment);
   }
 
   findAll() {
     return `This action returns all comments`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
-  }
+  async findOne(id: number) {
+    const comment = await this.commentRepository.findOneBy({ id });
 
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
+    if (!comment) throw new NotFoundException('Comentatio não encontrado!');
+
+    return comment;
   }
 
   remove(id: number) {
     return `This action removes a #${id} comment`;
+  }
+
+  async addLike(id: number) {
+    const comment = await this.findOne(id);
+    comment.likes += 1;
+    return this.commentRepository.save(comment);
+  }
+
+  async removeLike(id: number) {
+    const comment = await this.findOne(id);
+
+    if (comment.likes == 0) return comment;
+
+    comment.likes -= 1;
+    return this.commentRepository.save(comment);
   }
 }
