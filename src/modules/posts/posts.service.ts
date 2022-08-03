@@ -117,9 +117,18 @@ export class PostsService {
     return { msg: 'Post deletado com sucesso!' };
   }
 
-  async updateLike(id: number) {
+  async addLike(id: number) {
+    const post = await this.findOne(id);
+    post.likes += 1;
+    return this.postRepository.save(post);
+  }
+
+  async removeLike(id: number) {
     const post = await this.findOne(id);
 
-    // this.postRepository.increment(post.likes, );
+    if (post.likes == 0) return post;
+
+    post.likes -= 1;
+    return this.postRepository.save(post);
   }
 }

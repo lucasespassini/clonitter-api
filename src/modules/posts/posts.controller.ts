@@ -50,8 +50,13 @@ export class PostsController {
     return this.postsService.remove(+id);
   }
 
-  @Post(':id')
-  updateLike(@Param('id') id: string) {
-    return this.postsService.updateLike(+id);
+  @Post('add-like/:id')
+  addLike(@Param('id') id: string) {
+    return this.postsService.addLike(+id);
+  }
+
+  @Post('remove-like/:id')
+  removeLike(@Param('id') id: string) {
+    return this.postsService.removeLike(+id);
   }
 }
