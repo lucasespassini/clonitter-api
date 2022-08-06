@@ -104,6 +104,7 @@ export class UsersService {
         password: user.password,
       },
       this.secret,
+      { expiresIn: '2d' },
     );
     return { token };
   }
