@@ -37,6 +37,17 @@ export class PostsService {
     return posts;
   }
 
+  async findOneByUUID(uuid: string) {
+    const post = await this.postRepository.findOne({
+      where: { uuid },
+      relations: ['comments', 'user'],
+    });
+
+    if (!post) throw new NotFoundException('Post não encontrado!');
+
+    return post;
+  }
+
   async findAllPostsByUserId(id: number) {
     const user = await this.userRepository.findOneBy({ id });
 

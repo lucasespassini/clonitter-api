@@ -30,6 +30,11 @@ export class PostsController {
     return this.postsService.findAllPostsByUserId(+id);
   }
 
+  @Get('user/:uuid')
+  findOneByUUID(@Param('uuid') uuid: string) {
+    return this.postsService.findOneByUUID(uuid);
+  }
+
   @Get('user/:id/friends')
   findAllPostsFromFriends(@Param('id') id: string) {
     return this.postsService.findAllFriendPosts(+id);
