@@ -1,33 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Post } from '../posts/entities/post.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Comment } from './entities/comment.entity';
-import { User } from 'src/modules/users/entities/user.entity';
-import { Post } from 'src/modules/posts/entities/post.entity';
 
 @Injectable()
 export class CommentsService {
   constructor(
     @InjectRepository(Comment)
     private commentRepository: Repository<Comment>,
+    @InjectRepository(Post)
+    private postRepository: Repository<Post>,
   ) {}
 
   async create(createCommentDto: CreateCommentDto) {
-    const post = new Post();
-    const user = new User();
-    const comment = new Comment();
-
-    comment.content = createCommentDto.content;
-
-    user.id = +createCommentDto.userId;
-    post.id = +createCommentDto.postId;
-
-    comment.user = user;
-    comment.post = post;
-
-    return this.commentRepository.save(comment);
+    const newComment = this.commentRepository.create(createCommentDto);
+    return this.commentRepository.save(newComment);
   }
 
   findAll() {
@@ -35,11 +24,33 @@ export class CommentsService {
   }
 
   async findOne(id: number) {
-    const comment = await this.commentRepository.findOneBy({ id });
+    const comment = await this.commentRepository.findOne({
+      where: { id },
+      relations: {
+        post: true,
+        user: true,
+      },
+    });
 
-    if (!comment) throw new NotFoundException('Comentatio não encontrado!');
+    if (!comment) throw new NotFoundException('Comentário não encontrado!');
 
     return comment;
+  }
+
+  async findAllCommentsByPostId(postUUID: string) {
+    const post = await this.postRepository.findOneBy({ uuid: postUUID });
+
+    if (!post) throw new NotFoundException('Post não encontrado!');
+
+    const comments = await this.commentRepository
+      .createQueryBuilder('comments')
+      .innerJoin('comments.post', 'post')
+      .where('post.uuid = :postUUID', { postUUID })
+      .innerJoinAndSelect('comments.user', 'user')
+      .orderBy('comments.id', 'ASC')
+      .getMany();
+
+    return comments;
   }
 
   remove(id: number) {

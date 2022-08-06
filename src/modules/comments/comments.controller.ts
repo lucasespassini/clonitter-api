@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Controller('comment')
 export class CommentsController {
@@ -20,6 +19,11 @@ export class CommentsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.commentsService.findOne(+id);
+  }
+
+  @Get('post/:postId')
+  findAllCommentsByPostId(@Param('postId') postId: string) {
+    return this.commentsService.findAllCommentsByPostId(postId);
   }
 
   @Delete(':id')

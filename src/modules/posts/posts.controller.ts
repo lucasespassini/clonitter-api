@@ -30,7 +30,7 @@ export class PostsController {
     return this.postsService.findAllPostsByUserId(+id);
   }
 
-  @Get('user/:uuid')
+  @Get('/uuid/:uuid')
   findOneByUUID(@Param('uuid') uuid: string) {
     return this.postsService.findOneByUUID(uuid);
   }
