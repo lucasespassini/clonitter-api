@@ -145,6 +145,17 @@ export class UsersService {
     return user;
   }
 
+  async findByUUID(uuid: string) {
+    const user = await this.userRepository.findOne({
+      where: { uuid },
+      relations: ['posts', 'comments'],
+    });
+
+    if (!user) throw new NotFoundException(`Usuário não encontrado!`);
+
+    return user;
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto) {
     await this.findOne(id);
 

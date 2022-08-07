@@ -55,13 +55,13 @@ export class PostsController {
     return this.postsService.remove(+id);
   }
 
-  @Post('add-like/:id')
-  addLike(@Param('id') id: string) {
-    return this.postsService.addLike(+id);
+  @Patch('add-like/:uuid')
+  addLike(@Param('uuid') uuid: string) {
+    return this.postsService.addLike(uuid);
   }
 
-  @Post('remove-like/:id')
-  removeLike(@Param('id') id: string) {
-    return this.postsService.removeLike(+id);
+  @Patch('remove-like/:uuid')
+  removeLike(@Param('uuid') uuid: string) {
+    return this.postsService.removeLike(uuid);
   }
 }

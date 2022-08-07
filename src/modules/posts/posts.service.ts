@@ -72,6 +72,8 @@ export class PostsService {
       relations: ['posts', 'friendships'],
     });
 
+    if (!user) throw new NotFoundException('Usuário não encontrado!');
+
     for (const post of user.posts) {
       posts.push(post);
     }
@@ -128,14 +130,19 @@ export class PostsService {
     return { msg: 'Post deletado com sucesso!' };
   }
 
-  async addLike(id: number) {
-    const post = await this.findOne(id);
+  async addLike(uuid: string) {
+    const post = await this.postRepository.findOneBy({ uuid });
+
+    if (!post) throw new NotFoundException('Post não encontrado!');
+
     post.likes += 1;
     return this.postRepository.save(post);
   }
 
-  async removeLike(id: number) {
-    const post = await this.findOne(id);
+  async removeLike(uuid: string) {
+    const post = await this.postRepository.findOneBy({ uuid });
+
+    if (!post) throw new NotFoundException('Post não encontrado!');
 
     if (post.likes == 0) return post;
 
