@@ -69,24 +69,33 @@ export class PostsService {
 
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['posts', 'friendships'],
+      relations: {
+        friendships: true,
+      },
     });
 
     if (!user) throw new NotFoundException('Usuário não encontrado!');
-
-    for (const post of user.posts) {
-      posts.push(post);
-    }
 
     for (const friendship of user.friendships) {
       const friendPosts = await this.postRepository
         .createQueryBuilder('posts')
         .innerJoinAndSelect('posts.user', 'user')
-        .where('user.id = :followerId', { followerId: friendship.followerId })
+        .where('user.id = :followerId', {
+          followerId: friendship.followerId,
+        })
         .getMany();
 
       friendPosts.forEach((post) => posts.push(post));
     }
+
+    const userPosts = await this.postRepository
+      .createQueryBuilder('posts')
+      .innerJoinAndSelect('posts.user', 'user')
+      .where('user.id = :id', { id })
+      .leftJoinAndSelect('user.friendships', 'friendships')
+      .getMany();
+
+    userPosts.forEach((userPost) => posts.push(userPost));
 
     return posts.sort((a, b) => {
       if (a.id < b.id) {
