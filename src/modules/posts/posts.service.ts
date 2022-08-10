@@ -83,6 +83,7 @@ export class PostsService {
         .where('user.id = :followerId', {
           followerId: friendship.followerId,
         })
+        .leftJoinAndSelect('posts.comments', 'comments')
         .getMany();
 
       friendPosts.forEach((post) => posts.push(post));
@@ -93,6 +94,7 @@ export class PostsService {
       .innerJoinAndSelect('posts.user', 'user')
       .where('user.id = :id', { id })
       .leftJoinAndSelect('user.friendships', 'friendships')
+      .leftJoinAndSelect('posts.comments', 'comments')
       .getMany();
 
     userPosts.forEach((userPost) => posts.push(userPost));
