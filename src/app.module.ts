@@ -5,28 +5,24 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { CommentsModule } from './modules/comments/comments.module';
-import { User } from './modules/users/entities/user.entity';
-import { Post } from './modules/posts/entities/post.entity';
-import { Comment } from './modules/comments/entities/comment.entity';
-import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { FriendshipsModule } from './modules/friendships/friendships.module';
+import { AppController } from './app.controller';
 import { UsersController } from './modules/users/users.controller';
 import { PostsController } from './modules/posts/posts.controller';
 import { CommentsController } from './modules/comments/comments.controller';
-import { ConfigModule } from '@nestjs/config';
-import { FriendshipsModule } from './modules/friendships/friendships.module';
+import { AppService } from './app.service';
+import { User } from './modules/users/entities/user.entity';
+import { Post } from './modules/posts/entities/post.entity';
+import { Comment } from './modules/comments/entities/comment.entity';
 import { Friendship } from './modules/friendships/entities/friendship.entity';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
 
 @Module({
   imports: [
-    UsersModule,
-    PostsModule,
-    CommentsModule,
-    FriendshipsModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -38,6 +34,10 @@ import { Friendship } from './modules/friendships/entities/friendship.entity';
       entities: [User, Post, Comment, Friendship],
       synchronize: true,
     }),
+    UsersModule,
+    PostsModule,
+    CommentsModule,
+    FriendshipsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

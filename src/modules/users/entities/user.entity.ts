@@ -1,6 +1,3 @@
-import { Comment } from 'src/modules/comments/entities/comment.entity';
-import { Friendship } from 'src/modules/friendships/entities/friendship.entity';
-import { Post } from 'src/modules/posts/entities/post.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,6 +6,9 @@ import {
   JoinColumn,
   Generated,
 } from 'typeorm';
+import { Post } from 'src/modules/posts/entities/post.entity';
+import { Comment } from 'src/modules/comments/entities/comment.entity';
+import { Friendship } from 'src/modules/friendships/entities/friendship.entity';
 
 @Entity('users')
 export class User {
