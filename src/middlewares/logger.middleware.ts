@@ -7,6 +7,7 @@ export class LoggerMiddleware implements NestMiddleware {
   private secret = process.env.JWT_SECRET;
   use(req: Request, res: Response, next: NextFunction) {
     const authToken = req.headers['authorization'];
+
     if (authToken != undefined) {
       const token = authToken.split(' ')[1];
       const decoded = verify(token, this.secret);

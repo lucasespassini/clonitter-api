@@ -31,6 +31,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
+      timezone: process.env.DB_TIMEZONE,
       entities: [User, Post, Comment, Friendship],
       synchronize: true,
     }),

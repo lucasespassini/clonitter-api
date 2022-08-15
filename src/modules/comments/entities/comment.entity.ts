@@ -14,7 +14,7 @@ export class Comment {
   likes: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: string;
+  createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.comments, {
     onDelete: 'CASCADE',

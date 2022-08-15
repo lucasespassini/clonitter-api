@@ -7,7 +7,6 @@ export class AppService {
   async validate(authToken: string) {
     const token = authToken.split(' ')[1];
     const decoded = verify(token, this.secret);
-
     return decoded;
   }
 }

@@ -26,7 +26,7 @@ export class Post {
   likes: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: string;
+  createdAt: Date;
 
   @JoinColumn()
   @ManyToOne(() => User, (user) => user.posts, {
