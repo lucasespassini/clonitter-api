@@ -177,14 +177,28 @@ export class UsersService {
   async login(loginUserDto: UpdateUserDto) {
     const user = await this.findByEmail(loginUserDto.email);
 
-    if (!user) {
-      throw new NotFoundException('Esse usuário não existe!');
+    interface Errors {
+      emailError: string | undefined;
+      passwordError: string | undefined;
     }
 
-    const result = await compare(loginUserDto.password, user.password);
+    const errors: Errors = {
+      emailError: undefined,
+      passwordError: undefined,
+    };
 
-    if (!result) {
-      throw new NotAcceptableException('Senha incorreta!');
+    if (!user) {
+      errors.emailError = 'Esse usuário não existe!';
+    } else {
+      const result = await compare(loginUserDto.password, user.password);
+
+      if (!result) {
+        errors.passwordError = 'Senha incorreta!';
+      }
+    }
+
+    if (errors.emailError != undefined || errors.passwordError != undefined) {
+      throw new NotAcceptableException({ errors });
     }
 
     const token = sign(
