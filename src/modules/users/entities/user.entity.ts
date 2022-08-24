@@ -19,6 +19,9 @@ export class User {
   @Column()
   uuid: string;
 
+  @Column({ nullable: true })
+  profile_image: string;
+
   @Column({ length: 50, unique: true })
   user_name: string;
 

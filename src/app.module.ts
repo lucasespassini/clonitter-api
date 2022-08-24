@@ -20,6 +20,9 @@ import { Post } from './modules/posts/entities/post.entity';
 import { Comment } from './modules/comments/entities/comment.entity';
 import { Friendship } from './modules/friendships/entities/friendship.entity';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { MulterModule } from '@nestjs/platform-express';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -34,6 +37,13 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
       timezone: process.env.DB_TIMEZONE,
       entities: [User, Post, Comment, Friendship],
       synchronize: true,
+    }),
+    MulterModule.register({
+      dest: 'public',
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      renderPath: '/uploads/',
     }),
     UsersModule,
     PostsModule,

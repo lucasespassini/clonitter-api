@@ -1,5 +1,5 @@
 /.env
-/uploads
+public/uploads
 # compiled output
 /dist
 /node_modules

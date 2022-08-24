@@ -37,7 +37,8 @@ export class UsersService {
     return undefined;
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, file: Express.Multer.File) {
+    createUserDto.profile_image = file.filename;
     const newUser = this.userRepository.create(createUserDto);
     const emailExists = await this.findByEmail(newUser.email);
     const userNameExists = await this.findByUserName(newUser.user_name);
