@@ -99,6 +99,7 @@ export class UsersService {
       {
         id: user.id,
         uuid: user.uuid,
+        profile_image: user.profile_image,
         user_name: user.user_name,
         name: user.name,
         email: user.email,
@@ -206,6 +207,7 @@ export class UsersService {
       {
         id: user.id,
         uuid: user.uuid,
+        profile_image: user.profile_image,
         user_name: user.user_name,
         name: user.name,
         email: user.email,
