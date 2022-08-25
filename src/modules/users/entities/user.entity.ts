@@ -16,7 +16,7 @@ export class User {
   id: number;
 
   @Generated('uuid')
-  @Column()
+  @Column({ unique: true })
   uuid: string;
 
   @Column({ nullable: true })

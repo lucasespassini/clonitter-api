@@ -14,14 +14,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import { storage_profile_avatar } from '../config/multer.config';
+import { storage_profile_image } from '../config/multer.config';
 
 @Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseInterceptors(
-    FileInterceptor('profile_image', { storage: storage_profile_avatar }),
+    FileInterceptor('profile_image', { storage: storage_profile_image }),
   )
   @Post()
   create(

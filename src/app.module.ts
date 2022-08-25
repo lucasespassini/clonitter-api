@@ -23,6 +23,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { FriendshipsController } from './modules/friendships/friendships.controller';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ export class AppModule implements NestModule {
         UsersController,
         PostsController,
         CommentsController,
+        FriendshipsController,
       );
   }
 }

@@ -40,17 +40,21 @@ export class UsersService {
   async create(createUserDto: CreateUserDto, file: Express.Multer.File) {
     createUserDto.profile_image = file.filename;
     const newUser = this.userRepository.create(createUserDto);
-    const emailExists = await this.findByEmail(newUser.email);
-    const userNameExists = await this.findByUserName(newUser.user_name);
+    const result = await Promise.all([
+      this.findByEmail(newUser.email),
+      this.findByUserName(newUser.user_name),
+    ]);
+    const userNameExists = result[0];
+    const emailExists = result[1];
 
-    interface Errors {
+    interface IErrors {
       user_nameError: string | undefined;
       nameError: string | undefined;
       emailError: string | undefined;
       passwordError: string | undefined;
     }
 
-    const errors: Errors = {
+    const errors: IErrors = {
       user_nameError: undefined,
       nameError: undefined,
       emailError: undefined,
