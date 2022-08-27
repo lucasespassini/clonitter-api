@@ -30,11 +30,26 @@ export class UsersService {
   }
 
   async findByUserName(user_name: string) {
-    const user = await this.userRepository.findOneBy({ user_name });
-    if (user) {
-      return user;
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.user_name = :user_name', { user_name })
+      .leftJoinAndSelect('user.posts', 'posts')
+      .leftJoinAndSelect('user.friendships', 'friendships')
+      .select([
+        'user.id',
+        'user.profile_image',
+        'user.user_name',
+        'user.name',
+        'user.email',
+        'posts',
+        'friendships',
+      ])
+      .getOne();
+
+    if (!user) {
+      throw new NotFoundException();
     }
-    return undefined;
+    return user;
   }
 
   async create(createUserDto: CreateUserDto, file: Express.Multer.File) {
@@ -143,17 +158,6 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('Usuário não encontrado!');
     }
-
-    return user;
-  }
-
-  async findByUUID(uuid: string) {
-    const user = await this.userRepository.findOne({
-      where: { uuid },
-      relations: ['posts', 'comments'],
-    });
-
-    if (!user) throw new NotFoundException(`Usuário não encontrado!`);
 
     return user;
   }

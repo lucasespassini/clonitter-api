@@ -42,9 +42,9 @@ export class UsersController {
     return this.usersService.findOne(+id);
   }
 
-  @Get('/uuid/:uuid')
-  findByUUID(@Param('uuid') uuid: string) {
-    return this.usersService.findByUUID(uuid);
+  @Get('/user_name/:user_name')
+  findByUUID(@Param('user_name') user_name: string) {
+    return this.usersService.findByUserName(user_name);
   }
 
   @Patch(':id')
