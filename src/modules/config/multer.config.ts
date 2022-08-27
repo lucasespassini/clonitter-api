@@ -2,7 +2,7 @@ import { diskStorage } from 'multer';
 import { parse } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-export const storage_profile_avatar = diskStorage({
+export const storage_profile_image = diskStorage({
   destination: 'public/uploads/profile_image',
   filename: (req, file, callback) => {
     callback(null, generateFilename(file));

@@ -14,11 +14,11 @@ export class LoggerMiddleware implements NestMiddleware {
       if (decoded != undefined) {
         next();
       } else {
-        res.status(403).send('Você não está logado!');
+        res.status(403).json({ error: 'Você não está logado!' });
         return;
       }
     } else {
-      res.status(403).send('Você não está logado!');
+      res.status(403).json({ error: 'Você não está logado!' });
       return;
     }
   }

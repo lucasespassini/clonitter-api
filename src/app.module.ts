@@ -4,17 +4,18 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import { AppService } from './app.service';
+import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { FriendshipsModule } from './modules/friendships/friendships.module';
-import { AppController } from './app.controller';
 import { UsersController } from './modules/users/users.controller';
 import { PostsController } from './modules/posts/posts.controller';
 import { CommentsController } from './modules/comments/comments.controller';
-import { AppService } from './app.service';
+import { FriendshipsController } from './modules/friendships/friendships.controller';
 import { User } from './modules/users/entities/user.entity';
 import { Post } from './modules/posts/entities/post.entity';
 import { Comment } from './modules/comments/entities/comment.entity';
@@ -72,6 +73,7 @@ export class AppModule implements NestModule {
         UsersController,
         PostsController,
         CommentsController,
+        FriendshipsController,
       );
   }
 }
