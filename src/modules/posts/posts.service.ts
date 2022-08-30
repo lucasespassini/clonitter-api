@@ -38,10 +38,32 @@ export class PostsService {
   }
 
   async findOneByUUID(uuid: string) {
-    const post = await this.postRepository.findOne({
-      where: { uuid },
-      relations: ['comments', 'user'],
-    });
+    const post = await this.postRepository
+      .createQueryBuilder('posts')
+      .where('posts.uuid = :uuid', { uuid })
+      .innerJoin('posts.user', 'post_user')
+      .leftJoin('posts.comments', 'comments')
+      .leftJoin('comments.user', 'comment_user')
+      .select([
+        'posts.id',
+        'posts.uuid',
+        'posts.content',
+        'posts.likes',
+        'posts.createdAt',
+        'post_user.id',
+        'post_user.profile_image',
+        'post_user.user_name',
+        'post_user.name',
+        'comments.id',
+        'comments.content',
+        'comments.likes',
+        'comments.createdAt',
+        'comment_user.id',
+        'comment_user.profile_image',
+        'comment_user.user_name',
+        'comment_user.name',
+      ])
+      .getOne();
 
     if (!post) throw new NotFoundException('Post não encontrado!');
 
@@ -65,50 +87,63 @@ export class PostsService {
   }
 
   async findAllFriendPosts(id: number) {
-    const posts = [];
-
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: {
-        friendships: true,
-      },
-    });
-
-    if (!user) throw new NotFoundException('Usuário não encontrado!');
-
-    for (const friendship of user.friendships) {
-      const friendPosts = await this.postRepository
-        .createQueryBuilder('posts')
-        .innerJoinAndSelect('posts.user', 'user')
-        .where('user.id = :followerId', {
-          followerId: friendship.followerId,
-        })
-        .leftJoinAndSelect('posts.comments', 'comments')
-        .getMany();
-
-      friendPosts.forEach((post) => posts.push(post));
-    }
-
-    const userPosts = await this.postRepository
+    const posts = await this.postRepository
       .createQueryBuilder('posts')
       .innerJoinAndSelect('posts.user', 'user')
-      .where('user.id = :id', { id })
       .leftJoinAndSelect('user.friendships', 'friendships')
-      .leftJoinAndSelect('posts.comments', 'comments')
+      .where('user.id = :id', { id })
+      .orWhere('user.id = friendships.followerId')
+      // .andWhere('user.id = friendships.followerId')
       .getMany();
 
-    userPosts.forEach((userPost) => posts.push(userPost));
-
-    return posts.sort((a, b) => {
-      if (a.id < b.id) {
-        return 1;
-      }
-      if (a.id > b.id) {
-        return -1;
-      }
-      return 0;
-    });
+    return posts;
   }
+
+  // async findAllFriendPosts(id: number) {
+  //   const posts = [];
+
+  //   const user = await this.userRepository.findOne({
+  //     where: { id },
+  //     relations: {
+  //       friendships: true,
+  //     },
+  //   });
+
+  //   if (!user) throw new NotFoundException('Usuário não encontrado!');
+
+  //   for (const friendship of user.friendships) {
+  //     const friendPosts = await this.postRepository
+  //       .createQueryBuilder('posts')
+  //       .innerJoinAndSelect('posts.user', 'user')
+  //       .where('user.id = :followerId', {
+  //         followerId: friendship.followerId,
+  //       })
+  //       .leftJoinAndSelect('posts.comments', 'comments')
+  //       .getMany();
+
+  //     friendPosts.forEach((post) => posts.push(post));
+  //   }
+
+  //   const userPosts = await this.postRepository
+  //     .createQueryBuilder('posts')
+  //     .innerJoinAndSelect('posts.user', 'user')
+  //     .where('user.id = :id', { id })
+  //     .leftJoinAndSelect('user.friendships', 'friendships')
+  //     .leftJoinAndSelect('posts.comments', 'comments')
+  //     .getMany();
+
+  //   userPosts.forEach((userPost) => posts.push(userPost));
+
+  //   return posts.sort((a, b) => {
+  //     if (a.id < b.id) {
+  //       return 1;
+  //     }
+  //     if (a.id > b.id) {
+  //       return -1;
+  //     }
+  //     return 0;
+  //   });
+  // }
 
   async findOne(id: number) {
     const post = await this.postRepository.findOne({

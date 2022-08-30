@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { verify } from 'jsonwebtoken';
 
 @Injectable()
-export class LoggerMiddleware implements NestMiddleware {
+export class AuthMiddleware implements NestMiddleware {
   private secret = process.env.JWT_SECRET;
   use(req: Request, res: Response, next: NextFunction) {
     const authToken = req.headers['authorization'];
@@ -14,11 +14,11 @@ export class LoggerMiddleware implements NestMiddleware {
       if (decoded != undefined) {
         next();
       } else {
-        res.status(403).json({ error: 'Você não está logado!' });
+        res.status(401).json({ error: 'Você não está logado!' });
         return;
       }
     } else {
-      res.status(403).json({ error: 'Você não está logado!' });
+      res.status(401).json({ error: 'Você não está logado!' });
       return;
     }
   }
