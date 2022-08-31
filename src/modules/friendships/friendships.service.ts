@@ -29,20 +29,17 @@ export class FriendshipsService {
   }
 
   async create(createFriendshipDto: CreateFriendshipDto) {
-    await this.findOneUserById(createFriendshipDto.followerId);
+    const newFriend = await this.friendshipRepository.create(
+      createFriendshipDto,
+    );
 
-    if (createFriendshipDto.followerId == createFriendshipDto.userId) {
+    await this.findOneUserById(newFriend.followingId);
+
+    if (newFriend.followingId == newFriend.user) {
       throw new BadRequestException();
     }
 
-    const user = new User();
-    const friendship = new Friendship();
-
-    user.id = createFriendshipDto.userId;
-    friendship.followerId = createFriendshipDto.followerId;
-    friendship.user = user;
-
-    return this.friendshipRepository.save(friendship);
+    return this.friendshipRepository.save(newFriend);
   }
 
   findAll() {

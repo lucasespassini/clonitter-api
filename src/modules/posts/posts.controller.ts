@@ -25,17 +25,17 @@ export class PostsController {
     return this.postsService.findAll();
   }
 
-  @Get('user/:id')
-  findAllPostsByUserId(@Param('id') id: string) {
-    return this.postsService.findAllPostsByUserId(+id);
-  }
-
   @Get('/uuid/:uuid')
   findOneByUUID(@Param('uuid') uuid: string) {
     return this.postsService.findOneByUUID(uuid);
   }
 
-  @Get('user/:id/friends')
+  @Get('user/:id')
+  findAllPostsByUserId(@Param('id') id: string) {
+    return this.postsService.findAllPostsByUserId(+id);
+  }
+
+  @Get('user/:id/following')
   findAllPostsFromFriends(@Param('id') id: string) {
     return this.postsService.findAllFriendPosts(+id);
   }

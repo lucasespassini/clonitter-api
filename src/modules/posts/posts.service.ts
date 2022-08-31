@@ -88,62 +88,28 @@ export class PostsService {
 
   async findAllFriendPosts(id: number) {
     const posts = await this.postRepository
-      .createQueryBuilder('posts')
-      .innerJoinAndSelect('posts.user', 'user')
-      .leftJoinAndSelect('user.friendships', 'friendships')
-      .where('user.id = :id', { id })
-      .orWhere('user.id = friendships.followerId')
-      // .andWhere('user.id = friendships.followerId')
+      .createQueryBuilder('post')
+      .innerJoin('post.user', 'user')
+      .leftJoin('post.comments', 'comments')
+      .leftJoin('user.friendships', 'f')
+      .where(
+        '(user.id = :id OR user.id IN (SELECT f.followingId FROM friendships f WHERE f.userId = :id))',
+        { id },
+      )
+      .select([
+        'post',
+        'comments',
+        'f',
+        'user.id',
+        'user.profile_image',
+        'user.user_name',
+        'user.name',
+      ])
+      .orderBy('post.id', 'DESC')
       .getMany();
 
     return posts;
   }
-
-  // async findAllFriendPosts(id: number) {
-  //   const posts = [];
-
-  //   const user = await this.userRepository.findOne({
-  //     where: { id },
-  //     relations: {
-  //       friendships: true,
-  //     },
-  //   });
-
-  //   if (!user) throw new NotFoundException('Usuário não encontrado!');
-
-  //   for (const friendship of user.friendships) {
-  //     const friendPosts = await this.postRepository
-  //       .createQueryBuilder('posts')
-  //       .innerJoinAndSelect('posts.user', 'user')
-  //       .where('user.id = :followerId', {
-  //         followerId: friendship.followerId,
-  //       })
-  //       .leftJoinAndSelect('posts.comments', 'comments')
-  //       .getMany();
-
-  //     friendPosts.forEach((post) => posts.push(post));
-  //   }
-
-  //   const userPosts = await this.postRepository
-  //     .createQueryBuilder('posts')
-  //     .innerJoinAndSelect('posts.user', 'user')
-  //     .where('user.id = :id', { id })
-  //     .leftJoinAndSelect('user.friendships', 'friendships')
-  //     .leftJoinAndSelect('posts.comments', 'comments')
-  //     .getMany();
-
-  //   userPosts.forEach((userPost) => posts.push(userPost));
-
-  //   return posts.sort((a, b) => {
-  //     if (a.id < b.id) {
-  //       return 1;
-  //     }
-  //     if (a.id > b.id) {
-  //       return -1;
-  //     }
-  //     return 0;
-  //   });
-  // }
 
   async findOne(id: number) {
     const post = await this.postRepository.findOne({

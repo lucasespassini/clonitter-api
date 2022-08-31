@@ -7,11 +7,11 @@ export class Friendship {
   id: number;
 
   @Column()
-  followerId: number;
+  followingId: number;
 
   @ManyToOne(() => User, (user) => user.friendships, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  user: User;
+  user: User | number;
 }

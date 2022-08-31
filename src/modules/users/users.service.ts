@@ -23,10 +23,10 @@ export class UsersService {
 
   async findByEmail(email: string) {
     const user = await this.userRepository.findOneBy({ email });
-    if (user) {
-      return user;
+    if (!user) {
+      return undefined;
     }
-    return undefined;
+    return user;
   }
 
   async findByUserName(user_name: string) {
@@ -44,16 +44,21 @@ export class UsersService {
         'posts',
         'friendships',
       ])
+      .orderBy('posts.id', 'DESC')
       .getOne();
 
     if (!user) {
-      throw new NotFoundException();
+      return undefined;
     }
     return user;
   }
 
   async create(createUserDto: CreateUserDto, file: Express.Multer.File) {
-    createUserDto.profile_image = file.filename;
+    if (!file) {
+      createUserDto.profile_image = '126.png';
+    } else {
+      createUserDto.profile_image = file.filename;
+    }
     const newUser = this.userRepository.create(createUserDto);
     const result = await Promise.all([
       this.findByEmail(newUser.email),
