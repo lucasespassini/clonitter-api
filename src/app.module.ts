@@ -38,6 +38,7 @@ import { FriendshipsController } from './modules/friendships/friendships.control
       database: process.env.DB_NAME,
       entities: [User, Post, Comment, Friendship],
       synchronize: true,
+      logging: false,
     }),
     MulterModule.register({
       dest: 'public',

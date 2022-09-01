@@ -30,28 +30,66 @@ export class UsersService {
   }
 
   async findByUserName(user_name: string) {
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .where('user.user_name = :user_name', { user_name })
-      .leftJoinAndSelect('user.posts', 'posts')
-      .leftJoinAndSelect('user.friendships', 'friendships')
-      .select([
-        'user.id',
-        'user.profile_image',
-        'user.user_name',
-        'user.name',
-        'user.email',
-        'posts',
-        'friendships',
-      ])
-      .orderBy('posts.id', 'DESC')
-      .getOne();
+    const query = `
+    SELECT
+      JSON_OBJECT(
+        'id', u.id,
+        'profile_image', u.profile_image,
+        'user_name', u.user_name,
+        'name', u.name,
+        'Seguidores', (SELECT COUNT(f.followingId) FROM friendships f WHERE f.followingId = u.id),
+        'Seguindo', (SELECT COUNT(f.userId) FROM friendships f WHERE f.userId = u.id),
+        'posts', JSON_OBJECT(
+          'uuid', p.uuid,
+          'content', p.content,
+          'likes', p.likes,
+          'createdAt', p.createdAt
+        )
+      ) AS 'user'
+    FROM users u
+    LEFT JOIN posts p ON u.id = p.userId
+    WHERE u.user_name = ?;
+    `;
+    const user = await this.userRepository.query(query, [user_name]);
+    console.log(user);
 
     if (!user) {
       return undefined;
     }
     return user;
   }
+
+  // async findByUserName(user_name: string) {
+  //   const user = await this.userRepository
+  //     .createQueryBuilder('user')
+  //     .where('user.user_name = :user_name', { user_name })
+  //     .leftJoinAndSelect('user.posts', 'posts')
+  //     .leftJoinAndSelect('user.friendships', 'friendships')
+  //     .select([
+  //       'user.id',
+  //       'user.profile_image',
+  //       'user.user_name',
+  //       'user.name',
+  //       'user.email',
+  //       'posts',
+  //       'friendships',
+  //     ])
+  //     // .addSelect(
+  //     //   'SELECT COUNT(f.followingId) FROM friendships f WHERE f.followingId = 1',
+  //     //   'Seguidores',
+  //     // )
+  //     // .addSelect(
+  //     //   'SELECT COUNT(f.userId) FROM friendships f WHERE f.userId = 1',
+  //     //   'Seguindo',
+  //     // )
+  //     .orderBy('posts.id', 'DESC')
+  //     .getRawOne();
+
+  //   if (!user) {
+  //     return undefined;
+  //   }
+  //   return user;
+  // }
 
   async create(createUserDto: CreateUserDto, file: Express.Multer.File) {
     if (!file) {
