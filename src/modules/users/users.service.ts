@@ -12,6 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { hash, compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { validate } from 'isemail';
+import { Friendship } from '../friendships/entities/friendship.entity';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +20,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Friendship)
+    private friendRepository: Repository<Friendship>,
   ) {}
 
   async findByEmail(email: string) {
@@ -29,67 +32,68 @@ export class UsersService {
     return user;
   }
 
-  async findByUserName(user_name: string) {
-    const query = `
-    SELECT
-      JSON_OBJECT(
-        'id', u.id,
-        'profile_image', u.profile_image,
-        'user_name', u.user_name,
-        'name', u.name,
-        'Seguidores', (SELECT COUNT(f.followingId) FROM friendships f WHERE f.followingId = u.id),
-        'Seguindo', (SELECT COUNT(f.userId) FROM friendships f WHERE f.userId = u.id),
-        'posts', JSON_OBJECT(
-          'uuid', p.uuid,
-          'content', p.content,
-          'likes', p.likes,
-          'createdAt', p.createdAt
-        )
-      ) AS 'user'
-    FROM users u
-    LEFT JOIN posts p ON u.id = p.userId
-    WHERE u.user_name = ?;
-    `;
-    const user = await this.userRepository.query(query, [user_name]);
-    console.log(user);
-
-    if (!user) {
-      return undefined;
-    }
-    return user;
-  }
-
   // async findByUserName(user_name: string) {
-  //   const user = await this.userRepository
-  //     .createQueryBuilder('user')
-  //     .where('user.user_name = :user_name', { user_name })
-  //     .leftJoinAndSelect('user.posts', 'posts')
-  //     .leftJoinAndSelect('user.friendships', 'friendships')
-  //     .select([
-  //       'user.id',
-  //       'user.profile_image',
-  //       'user.user_name',
-  //       'user.name',
-  //       'user.email',
-  //       'posts',
-  //       'friendships',
-  //     ])
-  //     // .addSelect(
-  //     //   'SELECT COUNT(f.followingId) FROM friendships f WHERE f.followingId = 1',
-  //     //   'Seguidores',
-  //     // )
-  //     // .addSelect(
-  //     //   'SELECT COUNT(f.userId) FROM friendships f WHERE f.userId = 1',
-  //     //   'Seguindo',
-  //     // )
-  //     .orderBy('posts.id', 'DESC')
-  //     .getRawOne();
+  //   const query = `
+  //   SELECT
+  //     JSON_OBJECT(
+  //       'id', u.id,
+  //       'profile_image', u.profile_image,
+  //       'user_name', u.user_name,
+  //       'name', u.name,
+  //       'Seguidores', (SELECT COUNT(f.followingId) FROM friendships f WHERE f.followingId = u.id),
+  //       'Seguindo', (SELECT COUNT(f.userId) FROM friendships f WHERE f.userId = u.id),
+  //       'posts', JSON_OBJECT(
+  //         'uuid', p.uuid,
+  //         'content', p.content,
+  //         'likes', p.likes,
+  //         'createdAt', p.createdAt
+  //       )
+  //     ) AS 'user'
+  //   FROM users u
+  //   LEFT JOIN posts p ON u.id = p.userId
+  //   WHERE u.user_name = ?;
+  //   `;
+  //   const user = await this.userRepository.query(query, [user_name]);
 
   //   if (!user) {
   //     return undefined;
   //   }
   //   return user;
   // }
+
+  async findByUserName(user_name: string) {
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.user_name = :user_name', { user_name })
+      .leftJoinAndSelect('user.posts', 'posts')
+      .select([
+        'user.id',
+        'user.profile_image',
+        'user.user_name',
+        'user.name',
+        'user.email',
+        'posts',
+      ])
+      .orderBy('posts.id', 'DESC')
+      .getOne();
+
+    if (!user) {
+      return undefined;
+    }
+
+    const res = await Promise.all([
+      this.friendRepository.count({
+        where: { followingId: user.id },
+      }),
+      this.friendRepository
+        .createQueryBuilder('f')
+        .leftJoin('f.user', 'u')
+        .where('f.userId = :id', { id: user.id })
+        .getCount(),
+    ]);
+
+    return { user, followings: res[1], followers: res[0] };
+  }
 
   async create(createUserDto: CreateUserDto, file: Express.Multer.File) {
     if (!file) {
