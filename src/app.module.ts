@@ -1,9 +1,4 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -16,15 +11,12 @@ import { User } from './modules/users/entities/user.entity';
 import { Post } from './modules/posts/entities/post.entity';
 import { Comment } from './modules/comments/entities/comment.entity';
 import { Friendship } from './modules/friendships/entities/friendship.entity';
-import { AuthMiddleware } from './middlewares/auth.middleware';
 import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { LogMiddleware } from './middlewares/log.middleware';
-import { UsersController } from './modules/users/users.controller';
-import { PostsController } from './modules/posts/posts.controller';
-import { CommentsController } from './modules/comments/comments.controller';
-import { FriendshipsController } from './modules/friendships/friendships.controller';
+import { LoggerMiddleware } from './middlewares/log.middleware';
+
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -51,29 +43,13 @@ import { FriendshipsController } from './modules/friendships/friendships.control
     PostsModule,
     CommentsModule,
     FriendshipsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(AuthMiddleware, LogMiddleware)
-      .exclude(
-        {
-          path: 'user/login',
-          method: RequestMethod.POST,
-        },
-        {
-          path: 'user',
-          method: RequestMethod.POST,
-        },
-      )
-      .forRoutes(
-        UsersController,
-        PostsController,
-        CommentsController,
-        FriendshipsController,
-      );
+    consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }

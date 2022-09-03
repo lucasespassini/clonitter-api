@@ -9,7 +9,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-import { hash, compare } from 'bcryptjs';
+import { hash } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { validate } from 'isemail';
 import { Friendship } from '../friendships/entities/friendship.entity';
@@ -31,35 +31,6 @@ export class UsersService {
     }
     return user;
   }
-
-  // async findByUserName(user_name: string) {
-  //   const query = `
-  //   SELECT
-  //     JSON_OBJECT(
-  //       'id', u.id,
-  //       'profile_image', u.profile_image,
-  //       'user_name', u.user_name,
-  //       'name', u.name,
-  //       'Seguidores', (SELECT COUNT(f.followingId) FROM friendships f WHERE f.followingId = u.id),
-  //       'Seguindo', (SELECT COUNT(f.userId) FROM friendships f WHERE f.userId = u.id),
-  //       'posts', JSON_OBJECT(
-  //         'uuid', p.uuid,
-  //         'content', p.content,
-  //         'likes', p.likes,
-  //         'createdAt', p.createdAt
-  //       )
-  //     ) AS 'user'
-  //   FROM users u
-  //   LEFT JOIN posts p ON u.id = p.userId
-  //   WHERE u.user_name = ?;
-  //   `;
-  //   const user = await this.userRepository.query(query, [user_name]);
-
-  //   if (!user) {
-  //     return undefined;
-  //   }
-  //   return user;
-  // }
 
   async findByUserName(user_name: string) {
     const user = await this.userRepository
@@ -229,48 +200,5 @@ export class UsersService {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
     return { msg: 'Usuário deletado com sucesso!' };
-  }
-
-  async login(loginUserDto: UpdateUserDto) {
-    const user = await this.findByEmail(loginUserDto.email);
-
-    interface Errors {
-      emailError: string | undefined;
-      passwordError: string | undefined;
-    }
-
-    const errors: Errors = {
-      emailError: undefined,
-      passwordError: undefined,
-    };
-
-    if (!user) {
-      errors.emailError = 'Esse usuário não existe!';
-    } else {
-      const result = await compare(loginUserDto.password, user.password);
-
-      if (!result) {
-        errors.passwordError = 'Senha incorreta!';
-      }
-    }
-
-    if (errors.emailError != undefined || errors.passwordError != undefined) {
-      throw new NotAcceptableException({ errors });
-    }
-
-    const token = sign(
-      {
-        id: user.id,
-        uuid: user.uuid,
-        profile_image: user.profile_image,
-        user_name: user.user_name,
-        name: user.name,
-        email: user.email,
-        password: user.password,
-      },
-      this.secret,
-      { expiresIn: '2d' },
-    );
-    return { token };
   }
 }

@@ -1,9 +1,9 @@
-import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
+import { Injectable, Logger as LogGeral, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 
 @Injectable()
-export class LogMiddleware implements NestMiddleware {
-  private logger = new Logger('RoutesResolver');
+export class LoggerMiddleware implements NestMiddleware {
+  private logger = new LogGeral('RoutesResolver');
 
   use(request: Request, response: Response, next: NextFunction): void {
     const start = new Date().getTime();
