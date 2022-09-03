@@ -50,6 +50,6 @@ export class AuthService {
       email: user.email,
     };
 
-    return { token: this.jwtService.sign(payload) };
+    return { token: this.jwtService.sign(payload), payload };
   }
 }
