@@ -135,7 +135,6 @@ export class UsersService {
     const token = sign(
       {
         id: user.id,
-        uuid: user.uuid,
         profile_image: user.profile_image,
         user_name: user.user_name,
         name: user.name,
@@ -143,7 +142,7 @@ export class UsersService {
         password: user.password,
       },
       this.secret,
-      { expiresIn: '2d' },
+      { expiresIn: '1d' },
     );
     return { token };
   }
@@ -152,7 +151,6 @@ export class UsersService {
     const users = await this.userRepository.find({
       select: {
         id: true,
-        uuid: true,
         user_name: true,
         name: true,
         email: true,
@@ -165,10 +163,9 @@ export class UsersService {
 
   async findOne(id: number) {
     const user = await this.userRepository.findOne({
-      where: { id: id },
+      where: { id },
       select: {
         id: true,
-        uuid: true,
         user_name: true,
         name: true,
         email: true,

@@ -15,20 +15,16 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Generated('uuid')
-  @Column({ unique: true })
-  uuid: string;
-
   @Column({ nullable: true })
   profile_image: string;
 
-  @Column({ length: 50, unique: true })
+  @Column({ length: 10, unique: true })
   user_name: string;
 
-  @Column({ length: 50 })
+  @Column({ length: 20 })
   name: string;
 
-  @Column({ length: 100, unique: true })
+  @Column({ unique: true })
   email: string;
 
   @Column()
