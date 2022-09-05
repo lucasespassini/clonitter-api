@@ -1,17 +1,9 @@
-import {
-  Injectable,
-  NotAcceptableException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-import { hash } from 'bcryptjs';
-import { sign } from 'jsonwebtoken';
-import { validate } from 'isemail';
 import { Friendship } from '../friendships/entities/friendship.entity';
 
 @Injectable()
@@ -23,14 +15,6 @@ export class UsersService {
     @InjectRepository(Friendship)
     private friendRepository: Repository<Friendship>,
   ) {}
-
-  async findByEmail(email: string) {
-    const user = await this.userRepository.findOneBy({ email });
-    if (!user) {
-      return undefined;
-    }
-    return user;
-  }
 
   async findByUserName(user_name: string) {
     const user = await this.userRepository
