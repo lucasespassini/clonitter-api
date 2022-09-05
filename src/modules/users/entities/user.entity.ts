@@ -4,7 +4,6 @@ import {
   Column,
   OneToMany,
   JoinColumn,
-  Generated,
 } from 'typeorm';
 import { Post } from 'src/modules/posts/entities/post.entity';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
