@@ -22,7 +22,8 @@ export class PostsService {
   async create(createPostDto: CreatePostDto) {
     try {
       const newPost = this.postRepository.create(createPostDto);
-      return this.postRepository.save(newPost);
+      const post = await this.postRepository.save(newPost);
+      return this.findOneByUUID(post.uuid);
     } catch (error) {
       throw new BadRequestException({ error: error['sqlMessage'] });
     }

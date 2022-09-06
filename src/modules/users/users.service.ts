@@ -47,7 +47,7 @@ export class UsersService {
         .getCount(),
     ]);
 
-    return { user, followings: res[1], followers: res[0] };
+    return { user, followers: res[0], followings: res[1] };
   }
 
   async findAll() {

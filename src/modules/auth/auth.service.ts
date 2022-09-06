@@ -29,11 +29,7 @@ export class AuthService {
   }
 
   async signup(createUserDto: CreateUserDto, file: Express.Multer.File) {
-    if (!file) {
-      createUserDto.profile_image = '126.png';
-    } else {
-      createUserDto.profile_image = file.filename;
-    }
+    createUserDto.profile_image = file.filename;
     const newUser = this.userRepository.create(createUserDto);
     const result = await Promise.all([
       this.findByEmail(newUser.email),
