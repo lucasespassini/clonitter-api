@@ -54,6 +54,20 @@ export class UsersService {
     return { user, followers: res[0], followings: res[1] };
   }
 
+  async searchUser(name: string) {
+    return this.userRepository
+      .createQueryBuilder('users')
+      .where('users.user_name LIKE :name', { name: `%${name}%` })
+      .orWhere('users.name LIKE :name', { name: `%${name}%` })
+      .select([
+        'users.profile_image',
+        'users.user_name',
+        'users.name',
+        'users.email',
+      ])
+      .getMany();
+  }
+
   async findAll() {
     const users = await this.userRepository.find({
       select: {
