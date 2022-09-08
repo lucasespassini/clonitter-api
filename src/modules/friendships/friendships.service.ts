@@ -29,9 +29,7 @@ export class FriendshipsService {
   }
 
   async create(createFriendshipDto: CreateFriendshipDto) {
-    const newFriend = await this.friendshipRepository.create(
-      createFriendshipDto,
-    );
+    const newFriend = this.friendshipRepository.create(createFriendshipDto);
 
     await this.findOneUserById(newFriend.followingId);
 

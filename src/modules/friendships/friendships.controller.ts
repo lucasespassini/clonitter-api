@@ -12,7 +12,7 @@ import { CreateFriendshipDto } from './dto/create-friendship.dto';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @UseGuards(JwtGuard)
-@Controller('friendships')
+@Controller('friendship')
 export class FriendshipsController {
   constructor(private readonly friendshipsService: FriendshipsService) {}
 

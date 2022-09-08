@@ -28,8 +28,10 @@ export class AuthService {
     return user;
   }
 
-  async signup(createUserDto: CreateUserDto, file: Express.Multer.File) {
-    createUserDto.profile_image = file.filename;
+  async signup(createUserDto: CreateUserDto, file?: Express.Multer.File) {
+    file
+      ? (createUserDto.profile_image = file.filename)
+      : (createUserDto.profile_image = null);
     const newUser = this.userRepository.create(createUserDto);
     const result = await Promise.all([
       this.findByEmail(newUser.email),
@@ -67,10 +69,6 @@ export class AuthService {
 
     if (newUser.name.length > 20) {
       errors.nameError = 'O Nome não pode ter mais que 20 caracteres!';
-    }
-
-    if (newUser.name.length < 1) {
-      errors.nameError = 'O nome não pode ser vazio!';
     }
 
     if (emailExists != undefined) {

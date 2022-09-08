@@ -27,7 +27,7 @@ export class AuthController {
   signup(
     @Body() createUserDto: CreateUserDto,
     @UploadedFile()
-    file: Express.Multer.File,
+    file?: Express.Multer.File,
   ) {
     return this.authService.signup(createUserDto, file);
   }

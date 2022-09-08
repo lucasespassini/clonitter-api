@@ -19,8 +19,9 @@ export class UsersService {
   async findByUserName(user_name: string) {
     const user = await this.userRepository
       .createQueryBuilder('user')
-      .where('user.user_name = :user_name', { user_name })
       .leftJoinAndSelect('user.posts', 'posts')
+      .leftJoinAndSelect('user.friendships', 'f')
+      .where('user.user_name = :user_name', { user_name })
       .select([
         'user.id',
         'user.profile_image',
@@ -28,23 +29,26 @@ export class UsersService {
         'user.name',
         'user.email',
         'posts',
+        'f',
       ])
       .orderBy('posts.id', 'DESC')
       .getOne();
 
-    if (!user) {
-      return undefined;
-    }
+    if (!user) return undefined;
 
     const res = await Promise.all([
-      this.friendRepository.count({
-        where: { followingId: user.id },
-      }),
+      this.friendRepository
+        .createQueryBuilder('f')
+        .leftJoin('f.user', 'u')
+        .where('f.followingId = :id', { id: user.id })
+        .select(['f', 'u.id'])
+        .getManyAndCount(),
       this.friendRepository
         .createQueryBuilder('f')
         .leftJoin('f.user', 'u')
         .where('f.userId = :id', { id: user.id })
-        .getCount(),
+        .select(['f', 'u.id'])
+        .getManyAndCount(),
     ]);
 
     return { user, followers: res[0], followings: res[1] };
