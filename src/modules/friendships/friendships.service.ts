@@ -18,7 +18,7 @@ export class FriendshipsService {
     private userRepository: Repository<User>,
   ) {}
 
-  async findOneUserById(id: number) {
+  async findUserById(id: number) {
     const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
@@ -31,22 +31,20 @@ export class FriendshipsService {
   async create(createFriendshipDto: CreateFriendshipDto) {
     const newFriend = this.friendshipRepository.create(createFriendshipDto);
 
-    await this.findOneUserById(newFriend.followingId);
+    await this.findUserById(newFriend.followingId);
 
     if (newFriend.followingId == newFriend.user) {
       throw new BadRequestException();
     }
 
-    return this.friendshipRepository.save(newFriend);
-  }
-
-  findAll() {
-    return this.friendshipRepository.find();
+    const frindship = await this.friendshipRepository.save(newFriend);
+    return this.findOne(frindship.id);
   }
 
   async findOne(id: number) {
     const friendship = await this.friendshipRepository.findOne({
       where: { id },
+      relations: { user: true },
     });
 
     if (!friendship) {

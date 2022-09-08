@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Param,
@@ -19,16 +18,6 @@ export class FriendshipsController {
   @Post()
   create(@Body() createFriendshipDto: CreateFriendshipDto) {
     return this.friendshipsService.create(createFriendshipDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.friendshipsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.friendshipsService.findOne(+id);
   }
 
   @Delete(':id')
