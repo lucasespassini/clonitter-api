@@ -62,6 +62,7 @@ export class UsersService {
       .where('users.user_name LIKE :name', { name: `%${name}%` })
       .orWhere('users.name LIKE :name', { name: `%${name}%` })
       .select([
+        'users.id',
         'users.profile_image',
         'users.user_name',
         'users.name',
