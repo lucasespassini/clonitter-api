@@ -64,6 +64,7 @@ export class PostsService {
         'comment_user.user_name',
         'comment_user.name',
       ])
+      .orderBy('comments.id', 'ASC')
       .getOne();
 
     if (!post) throw new NotFoundException('Post não encontrado!');

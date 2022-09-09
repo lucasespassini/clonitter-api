@@ -20,6 +20,7 @@ export class UsersService {
     const user = await this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.posts', 'posts')
+      .leftJoinAndSelect('posts.comments', 'comments')
       .leftJoinAndSelect('user.friendships', 'f')
       .where('user.user_name = :user_name', { user_name })
       .select([
@@ -29,6 +30,7 @@ export class UsersService {
         'user.name',
         'user.email',
         'posts',
+        'comments',
         'f',
       ])
       .orderBy('posts.id', 'DESC')
