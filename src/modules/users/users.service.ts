@@ -116,9 +116,9 @@ export class UsersService {
   ) {
     await this.findOne(id);
 
-    file
-      ? (updateUserDto.profile_image = file.filename)
-      : (updateUserDto.profile_image = null);
+    if (file) {
+      updateUserDto.profile_image = file.filename;
+    }
 
     const editUser = await this.userRepository.preload({
       id: id,
