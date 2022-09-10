@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -60,7 +64,7 @@ export class UsersService {
     return this.userRepository
       .createQueryBuilder('users')
       .where('users.user_name LIKE :name', { name: `%${name}%` })
-      .orWhere('users.name LIKE :name', { name: `%${name}%` })
+      .orWhere('users.name LIKE :name', { name: `${name}%` })
       .select([
         'users.id',
         'users.profile_image',
@@ -105,16 +109,27 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    file: Express.Multer.File,
+  ) {
     await this.findOne(id);
+
+    file
+      ? (updateUserDto.profile_image = file.filename)
+      : (updateUserDto.profile_image = null);
 
     const editUser = await this.userRepository.preload({
       id: id,
       ...updateUserDto,
     });
 
-    await this.userRepository.save(editUser);
-    return { msg: 'Usuário editado com sucesso!' };
+    try {
+      return this.userRepository.save(editUser);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   async remove(id: number) {

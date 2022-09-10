@@ -64,7 +64,12 @@ export class AuthService {
     }
 
     if (newUser.user_name.length < 3) {
-      errors.user_nameError = 'O nome deve ter no mínimo 3 caracteres!';
+      errors.user_nameError =
+        'O nome de usuário deve ter no mínimo 3 caracteres!';
+    }
+
+    if (newUser.name.length < 3) {
+      errors.nameError = 'O nome deve ter no mínimo 3 caracteres!';
     }
 
     if (newUser.name.length > 20) {
