@@ -143,24 +143,4 @@ export class PostsService {
     await this.postRepository.delete(post);
     return { msg: 'Post deletado com sucesso!' };
   }
-
-  async addLike(uuid: string) {
-    const post = await this.postRepository.findOneBy({ uuid });
-
-    if (!post) throw new NotFoundException('Post não encontrado!');
-
-    post.likes += 1;
-    return this.postRepository.save(post);
-  }
-
-  async removeLike(uuid: string) {
-    const post = await this.postRepository.findOneBy({ uuid });
-
-    if (!post) throw new NotFoundException('Post não encontrado!');
-
-    if (post.likes == 0) return post;
-
-    post.likes -= 1;
-    return this.postRepository.save(post);
-  }
 }

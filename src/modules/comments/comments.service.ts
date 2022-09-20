@@ -1,26 +1,33 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from '../posts/entities/post.entity';
 import { Comment } from './entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { Notification } from '../notifications/entities/notification.entity';
 
 @Injectable()
 export class CommentsService {
   constructor(
     @InjectRepository(Comment)
-    private commentRepository: Repository<Comment>,
+    private readonly commentRepository: Repository<Comment>,
     @InjectRepository(Post)
-    private postRepository: Repository<Post>,
+    private readonly postRepository: Repository<Post>,
+    @InjectRepository(Notification)
+    private readonly notificationRepository: Repository<Notification>,
   ) {}
 
   async create(createCommentDto: CreateCommentDto) {
     const newComment = this.commentRepository.create(createCommentDto);
-    return this.commentRepository.save(newComment);
-  }
-
-  findAll() {
-    return `This action returns all comments`;
+    try {
+      return this.commentRepository.save(newComment);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   async findOne(id: number) {
@@ -55,20 +62,5 @@ export class CommentsService {
 
   remove(id: number) {
     return `This action removes a #${id} comment`;
-  }
-
-  async addLike(id: number) {
-    const comment = await this.findOne(id);
-    comment.likes += 1;
-    return this.commentRepository.save(comment);
-  }
-
-  async removeLike(id: number) {
-    const comment = await this.findOne(id);
-
-    if (comment.likes == 0) return comment;
-
-    comment.likes -= 1;
-    return this.commentRepository.save(comment);
   }
 }

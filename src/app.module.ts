@@ -15,6 +15,12 @@ import { join } from 'path';
 import { LoggerMiddleware } from './middlewares/log.middleware';
 
 import { AuthModule } from './modules/auth/auth.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { Notification } from './modules/notifications/entities/notification.entity';
+import { PostLikesModule } from './modules/likes/post_likes/post_likes.module';
+import { PostLike } from './modules/likes/post_likes/entities/post_like.entity';
+import { CommentLikesModule } from './modules/likes/comment_likes/comment_likes.module';
+import { CommentLike } from './modules/likes/comment_likes/entities/comment_like.entity';
 
 @Module({
   imports: [
@@ -26,7 +32,15 @@ import { AuthModule } from './modules/auth/auth.module';
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User, Post, Comment, Friendship],
+      entities: [
+        User,
+        Post,
+        Comment,
+        Friendship,
+        Notification,
+        PostLike,
+        CommentLike,
+      ],
       synchronize: true,
       logging: false,
     }),
@@ -42,6 +56,9 @@ import { AuthModule } from './modules/auth/auth.module';
     CommentsModule,
     FriendshipsModule,
     AuthModule,
+    NotificationsModule,
+    PostLikesModule,
+    CommentLikesModule,
   ],
 })
 export class AppModule implements NestModule {

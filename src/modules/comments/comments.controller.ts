@@ -21,11 +21,6 @@ export class CommentsController {
     return this.commentsService.create(createCommentDto);
   }
 
-  @Get()
-  findAll() {
-    return this.commentsService.findAll();
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.commentsService.findOne(+id);
@@ -39,15 +34,5 @@ export class CommentsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.commentsService.remove(+id);
-  }
-
-  @Post('add-like/:id')
-  addLike(@Param('id') id: string) {
-    return this.commentsService.addLike(+id);
-  }
-
-  @Post('remove-like/:id')
-  removeLike(@Param('id') id: string) {
-    return this.commentsService.removeLike(+id);
   }
 }
