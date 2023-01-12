@@ -9,6 +9,7 @@ import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 import { Friendship } from '../friendships/entities/friendship.entity';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +19,7 @@ export class UsersService {
     private userRepository: Repository<User>,
     @InjectRepository(Friendship)
     private friendRepository: Repository<Friendship>,
+    private prisma: PrismaClient,
   ) {}
 
   async findByUserName(user_name: string) {
@@ -76,15 +78,18 @@ export class UsersService {
   }
 
   async findAll() {
-    const users = await this.userRepository.find({
-      select: {
-        id: true,
-        user_name: true,
-        name: true,
-        email: true,
-        password: false,
-      },
-      relations: ['posts', 'comments', 'friendships'],
+    // const users = await this.userRepository.find({
+    //   select: {
+    //     id: true,
+    //     user_name: true,
+    //     name: true,
+    //     email: true,
+    //     password: false,
+    //   },
+    //   relations: ['posts', 'comments', 'friendships'],
+    // });
+    const users = await this.prisma.users.findMany({
+      include: { posts: true },
     });
     return users;
   }

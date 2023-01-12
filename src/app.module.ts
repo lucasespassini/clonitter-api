@@ -41,7 +41,7 @@ import { CommentLike } from './modules/likes/comment_likes/entities/comment_like
         PostLike,
         CommentLike,
       ],
-      synchronize: true,
+      synchronize: false,
       logging: false,
     }),
     MulterModule.register({
