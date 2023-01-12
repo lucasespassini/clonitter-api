@@ -7,9 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
-
 import { Friendship } from '../friendships/entities/friendship.entity';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
@@ -19,47 +18,25 @@ export class UsersService {
     private userRepository: Repository<User>,
     @InjectRepository(Friendship)
     private friendRepository: Repository<Friendship>,
-    private prisma: PrismaClient,
+    private prisma: PrismaService,
   ) {}
 
-  async findByUserName(user_name: string) {
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.posts', 'posts')
-      .leftJoinAndSelect('posts.comments', 'comments')
-      .leftJoinAndSelect('user.friendships', 'f')
-      .where('user.user_name = :user_name', { user_name })
-      .select([
-        'user.id',
-        'user.profile_image',
-        'user.user_name',
-        'user.name',
-        'user.email',
-        'posts',
-        'comments',
-        'f',
-      ])
-      .orderBy('posts.id', 'DESC')
-      .getOne();
+  async findByUserName(usr_user_name: string) {
+    const user = await this.prisma.users.findUnique({
+      select: {
+        usr_user_name: true,
+        usr_name: true,
+        profile: {
+          select: { prf_image: true, prf_bio: true },
+        },
+        posts: {
+          select: { pst_uuid: true, pst_content: true, pst_createdAt: true },
+        },
+      },
+      where: { usr_user_name },
+    });
 
-    if (!user) return undefined;
-
-    const res = await Promise.all([
-      this.friendRepository
-        .createQueryBuilder('f')
-        .leftJoin('f.user', 'u')
-        .where('f.followingId = :id', { id: user.id })
-        .select(['f', 'u.id'])
-        .getManyAndCount(),
-      this.friendRepository
-        .createQueryBuilder('f')
-        .leftJoin('f.user', 'u')
-        .where('f.userId = :id', { id: user.id })
-        .select(['f', 'u.id'])
-        .getManyAndCount(),
-    ]);
-
-    return { user, followers: res[0], followings: res[1] };
+    return user;
   }
 
   async searchUser(name: string) {
@@ -77,69 +54,32 @@ export class UsersService {
       .getMany();
   }
 
-  async findAll() {
-    // const users = await this.userRepository.find({
-    //   select: {
-    //     id: true,
-    //     user_name: true,
-    //     name: true,
-    //     email: true,
-    //     password: false,
-    //   },
-    //   relations: ['posts', 'comments', 'friendships'],
-    // });
-    const users = await this.prisma.users.findMany({
-      include: { posts: true },
-    });
-    return users;
-  }
+  // async update(
+  //   id: number,
+  //   updateUserDto: UpdateUserDto,
+  //   file: Express.Multer.File,
+  // ) {
+  //   await this.findOne(id);
 
-  async findOne(id: number) {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      select: {
-        id: true,
-        user_name: true,
-        name: true,
-        email: true,
-        password: false,
-      },
-      relations: ['posts', 'comments', 'friendships'],
-    });
+  //   if (file) {
+  //     updateUserDto.profile_image = file.filename;
+  //   }
 
-    if (!user) {
-      throw new NotFoundException('Usuário não encontrado!');
-    }
+  //   const editUser = await this.userRepository.preload({
+  //     id: id,
+  //     ...updateUserDto,
+  //   });
 
-    return user;
-  }
+  //   try {
+  //     return this.userRepository.save(editUser);
+  //   } catch (error) {
+  //     throw new InternalServerErrorException(error);
+  //   }
+  // }
 
-  async update(
-    id: number,
-    updateUserDto: UpdateUserDto,
-    file: Express.Multer.File,
-  ) {
-    await this.findOne(id);
-
-    if (file) {
-      updateUserDto.profile_image = file.filename;
-    }
-
-    const editUser = await this.userRepository.preload({
-      id: id,
-      ...updateUserDto,
-    });
-
-    try {
-      return this.userRepository.save(editUser);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
-
-  async remove(id: number) {
-    const user = await this.findOne(id);
-    await this.userRepository.remove(user);
-    return { msg: 'Usuário deletado com sucesso!' };
-  }
+  // async remove(id: number) {
+  //   const user = await this.findOne(id);
+  //   await this.userRepository.remove(user);
+  //   return { msg: 'Usuário deletado com sucesso!' };
+  // }
 }

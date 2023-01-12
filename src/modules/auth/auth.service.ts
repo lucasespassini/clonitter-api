@@ -1,12 +1,13 @@
-import { Injectable, NotAcceptableException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcryptjs';
 import { validate } from 'isemail';
 import { Repository } from 'typeorm';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { User } from '../users/entities/user.entity';
-import { LoginUserDto } from './dto/login-user.dto';
+import { SigninUserDto } from './dto/signin-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,139 +15,140 @@ export class AuthService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
   ) {}
 
-  async findByEmail(email: string) {
-    const user = await this.userRepository.findOneBy({ email });
-    if (!user) return undefined;
-    return user;
+  async emailExists(usr_email: string) {
+    const user = await this.prisma.users.findFirst({ where: { usr_email } });
+    return user ? true : false;
   }
 
-  async findByUserName(user_name: string) {
-    const user = await this.userRepository.findOneBy({ user_name });
-    if (!user) return undefined;
-    return user;
+  async userNameExists(usr_user_name: string) {
+    const user = await this.prisma.users.findFirst({
+      where: { usr_user_name },
+    });
+    return user ? true : false;
   }
 
-  async signup(createUserDto: CreateUserDto, file?: Express.Multer.File) {
-    file
-      ? (createUserDto.profile_image = file.filename)
-      : (createUserDto.profile_image = null);
-    const newUser = this.userRepository.create(createUserDto);
+  async signup(createUserDto: CreateUserDto) {
     const result = await Promise.all([
-      this.findByEmail(newUser.email),
-      this.findByUserName(newUser.user_name),
+      this.emailExists(createUserDto.usr_email),
+      this.userNameExists(createUserDto.usr_user_name),
     ]);
-    const userNameExists = result[1];
     const emailExists = result[0];
+    const userNameExists = result[1];
 
     interface IErrors {
-      user_nameError: string | undefined;
-      nameError: string | undefined;
-      emailError: string | undefined;
-      passwordError: string | undefined;
+      isError: boolean;
+      errors?: {
+        usr_user_name?: string;
+        usr_name?: string;
+        usr_email?: string;
+        usr_password?: string;
+      };
     }
 
     const errors: IErrors = {
-      user_nameError: undefined,
-      nameError: undefined,
-      emailError: undefined,
-      passwordError: undefined,
+      isError: false,
+      errors: {
+        usr_user_name: '',
+        usr_name: '',
+        usr_email: '',
+        usr_password: '',
+      },
     };
 
-    if (newUser.user_name.length > 10) {
-      errors.user_nameError =
-        'Nome de usuário não pode ter mais que 10 caracteres!';
+    if (createUserDto.usr_user_name.length < 3) {
+      errors.isError = true;
+      errors.errors.usr_user_name =
+        'Nome de usuário deve ter no mínimo 3 caracteres!';
+    }
+    if (createUserDto.usr_name.length < 3) {
+      errors.isError = true;
+      errors.errors.usr_name = 'Nome deve ter no mínimo 3 caracteres!';
+    }
+    if (!validate(createUserDto.usr_email)) {
+      errors.isError = true;
+      errors.errors.usr_email = 'Email inválido!';
+    }
+    if (createUserDto.usr_password.length < 5) {
+      errors.isError = true;
+      errors.errors.usr_password = 'Senha deve ter no mínimo 5 caracteres!';
+    }
+    if (emailExists) {
+      errors.isError = true;
+      errors.errors.usr_email = 'Email já cadastrado no sistema!';
+    }
+    if (userNameExists) {
+      errors.isError = true;
+      errors.errors.usr_user_name = 'Nome de usuário já cadastrado no sistema!';
     }
 
-    if (userNameExists != undefined) {
-      errors.user_nameError = 'Esse nome de usuário já está em uso!';
+    if (errors.isError) {
+      throw new BadRequestException({ errors: errors.errors });
     }
 
-    if (newUser.user_name.length < 3) {
-      errors.user_nameError =
-        'O nome de usuário deve ter no mínimo 3 caracteres!';
-    }
+    const newHash = await hash(createUserDto.usr_password, 10);
+    createUserDto.usr_password = newHash;
 
-    if (newUser.name.length < 3) {
-      errors.nameError = 'O nome deve ter no mínimo 3 caracteres!';
-    }
+    const user = await this.prisma.users.create({ data: createUserDto });
 
-    if (newUser.name.length > 20) {
-      errors.nameError = 'O Nome não pode ter mais que 20 caracteres!';
-    }
-
-    if (emailExists != undefined) {
-      errors.emailError = 'Esse e-mail já está cadastrado!';
-    }
-
-    if (!validate(newUser.email)) {
-      errors.emailError = 'O e-mail é inválido!';
-    }
-
-    if (newUser.password.length < 5) {
-      errors.passwordError = 'A senha deve ter no mínimo 5 caracteres!';
-    }
-
-    if (
-      errors.user_nameError != undefined ||
-      errors.nameError != undefined ||
-      errors.emailError != undefined ||
-      errors.passwordError != undefined
-    ) {
-      throw new NotAcceptableException({ errors });
-    }
-
-    const newHash = await hash(createUserDto.password, 10);
-    newUser.password = newHash;
-
-    const user = await this.userRepository.save(newUser);
+    const profile = await this.prisma.profile.create({
+      data: { prf_usr_id: user.usr_id },
+    });
 
     const payload = {
-      sub: user.id,
-      profile_image: user.profile_image,
-      user_name: user.user_name,
-      name: user.name,
-      email: user.email,
+      prf_image: profile.prf_image,
+      usr_user_name: user.usr_user_name,
+      usr_name: user.usr_name,
+      usr_created_at: user.usr_createdAt,
     };
 
     return { token: this.jwtService.sign(payload), payload };
   }
 
-  async login(loginUserDto: LoginUserDto) {
-    const user = await this.userRepository.findOneBy({
-      email: loginUserDto.email,
+  async signin(signinUserDto: SigninUserDto) {
+    const user = await this.prisma.users.findFirst({
+      where: {
+        OR: [
+          { usr_email: { equals: signinUserDto.login } },
+          { usr_user_name: { equals: signinUserDto.login } },
+        ],
+      },
     });
 
-    interface Errors {
-      emailError: string | undefined;
-      passwordError: string | undefined;
+    interface IErrors {
+      isError: boolean;
+      errors?: {
+        login?: string;
+        password?: string;
+      };
     }
 
-    const errors: Errors = {
-      emailError: undefined,
-      passwordError: undefined,
+    const errors: IErrors = {
+      isError: false,
+      errors: { login: '', password: '' },
     };
 
     if (!user) {
-      errors.emailError = 'Esse usuário não existe!';
+      errors.isError = true;
+      errors.errors.login = 'Esse usuário não existe!';
     } else {
-      const result = await compare(loginUserDto.password, user.password);
+      const result = await compare(signinUserDto.password, user.usr_password);
 
       if (!result) {
-        errors.passwordError = 'Senha incorreta!';
+        errors.isError = true;
+        errors.errors.password = 'Senha incorreta!';
       }
     }
 
-    if (errors.emailError || errors.passwordError)
-      throw new NotAcceptableException({ errors });
+    if (errors.isError)
+      throw new BadRequestException({ errors: errors.errors });
 
     const payload = {
-      sub: user.id,
-      profile_image: user.profile_image,
-      user_name: user.user_name,
-      name: user.name,
-      email: user.email,
+      usr_user_name: user.usr_user_name,
+      usr_name: user.usr_name,
+      usr_created_at: user.usr_createdAt,
     };
 
     return { token: this.jwtService.sign(payload), payload };

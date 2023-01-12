@@ -9,7 +9,6 @@ import { Post } from 'src/modules/posts/entities/post.entity';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { Friendship } from 'src/modules/friendships/entities/friendship.entity';
 import { Notification } from 'src/modules/notifications/entities/notification.entity';
-import { PostLike } from 'src/modules/likes/post_likes/entities/post_like.entity';
 
 @Entity('users')
 export class User {
@@ -38,10 +37,6 @@ export class User {
   @JoinColumn()
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];
-
-  @JoinColumn()
-  @OneToMany(() => PostLike, (postlike) => postlike.user)
-  likes: PostLike[];
 
   @JoinColumn()
   @OneToMany(() => Friendship, (friendship) => friendship.user)

@@ -1,7 +1,6 @@
 export class CreateUserDto {
-  profile_image?: string;
-  user_name: string;
-  name: string;
-  email: string;
-  password: string;
+  usr_user_name: string;
+  usr_name: string;
+  usr_email: string;
+  usr_password: string;
 }

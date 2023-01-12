@@ -9,15 +9,15 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { storage_profile_image } from '../config/multer.config';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { AuthService } from './auth.service';
-import { LoginUserDto } from './dto/login-user.dto';
+import { SigninUserDto } from './dto/signin-user.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('login')
-  login(@Body() loginUserDto: LoginUserDto) {
-    return this.authService.login(loginUserDto);
+  @Post('signin')
+  signin(@Body() loginUserDto: SigninUserDto) {
+    return this.authService.signin(loginUserDto);
   }
 
   @UseInterceptors(
@@ -29,6 +29,6 @@ export class AuthController {
     @UploadedFile()
     file?: Express.Multer.File,
   ) {
-    return this.authService.signup(createUserDto, file);
+    return this.authService.signup(createUserDto);
   }
 }

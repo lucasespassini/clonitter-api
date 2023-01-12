@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { User } from 'src/modules/users/entities/user.entity';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
-import { PostLike } from 'src/modules/likes/post_likes/entities/post_like.entity';
 
 @Entity('posts')
 export class Post {
@@ -39,11 +38,4 @@ export class Post {
     onUpdate: 'CASCADE',
   })
   comments: Comment[];
-
-  @JoinColumn()
-  @OneToMany(() => PostLike, (postlike) => postlike.post, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  likes: PostLike[];
 }

@@ -11,26 +11,26 @@ model comments {
   cmt_id        Int       @id @default(autoincrement())
   cmt_pst_id    Int
   cmt_usr_id    Int
-  cmt_uuid      String    @db.VarChar(150)
+  cmt_uuid      String    @db.VarChar(255)
   cmt_content   String    @db.VarChar(255)
   cmt_createdAt DateTime? @default(now()) @db.DateTime(0)
-  posts         posts     @relation(fields: [cmt_pst_id], references: [pst_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_cmt_pst_id")
-  users         users     @relation(fields: [cmt_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_cmt_usr_id")
+  posts         posts     @relation(fields: [cmt_pst_id], references: [pst_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_comments_cmt_pst_id")
+  users         users     @relation(fields: [cmt_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_comments_cmt_usr_id")
 
-  @@index([cmt_pst_id], map: "FK_cmt_pst_id")
-  @@index([cmt_usr_id], map: "FK_cmt_usr_id")
+  @@index([cmt_pst_id], map: "FK_comments_cmt_pst_id")
+  @@index([cmt_usr_id], map: "FK_comments_cmt_usr_id")
 }
 
 model friendships {
-  frd_id               Int       @id @default(autoincrement())
-  frd_usr_follower_id  Int
-  frd_usr_following_id Int
-  frd_createdAt        DateTime? @default(now()) @db.DateTime(0)
-  followers            users     @relation("friendships_frd_usr_follower_idTousers", fields: [frd_usr_follower_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_frd_usr_follower_id")
-  followings           users     @relation("friendships_frd_usr_following_idTousers", fields: [frd_usr_following_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_frd_usr_following_id")
+  frd_id                                        Int       @id @default(autoincrement())
+  frd_usr_follower_id                           Int
+  frd_usr_following_id                          Int
+  frd_createdAt                                 DateTime? @default(now()) @db.DateTime(0)
+  users_friendships_frd_usr_follower_idTousers  users     @relation("friendships_frd_usr_follower_idTousers", fields: [frd_usr_follower_id], references: [usr_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_friendships_frd_usr_follower_id")
+  users_friendships_frd_usr_following_idTousers users     @relation("friendships_frd_usr_following_idTousers", fields: [frd_usr_following_id], references: [usr_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_friendships_frd_usr_following_id")
 
-  @@index([frd_usr_follower_id], map: "FK_frd_usr_follower_id")
-  @@index([frd_usr_following_id], map: "FK_frd_usr_following_id")
+  @@index([frd_usr_follower_id], map: "FK_friendships_frd_usr_follower_id")
+  @@index([frd_usr_following_id], map: "FK_friendships_frd_usr_following_id")
 }
 
 model posts {
@@ -40,29 +40,31 @@ model posts {
   pst_content   String     @db.VarChar(255)
   pst_createdAt DateTime?  @default(now()) @db.DateTime(0)
   comments      comments[]
-  users         users      @relation(fields: [pst_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_pst_usr_id")
+  users         users      @relation(fields: [pst_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_posts_pst_usr_id")
 
-  @@index([pst_usr_id], map: "FK_pst_usr_id")
+  @@index([pst_usr_id], map: "FK_posts_pst_usr_id")
 }
 
 model profile {
-  prf_id     Int     @id @default(autoincrement())
-  prf_usr_id Int     @unique(map: "UK_profile_prf_usr_id")
-  prf_image  String? @unique(map: "UK_profile_prf_image") @db.VarChar(255)
-  prf_bio    String? @db.VarChar(255)
-  users      users   @relation(fields: [prf_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_prf_usr_id")
+  prf_id         Int     @id @default(autoincrement())
+  prf_usr_id     Int     @unique(map: "UK_profile_prf_usr_id")
+  prf_image      String? @unique(map: "UK_profile_prf_image") @db.VarChar(255)
+  prf_bio        String? @db.VarChar(255)
+  prf_followers  Int     @db.Int()
+  prf_followings Int     @db.Int()
+  users          users   @relation(fields: [prf_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_prf_usr_id")
 }
 
 model users {
-  usr_id        Int           @id @default(autoincrement())
-  usr_user_name String        @db.VarChar(30)
-  usr_name      String        @db.VarChar(30)
-  usr_email     String        @db.VarChar(255)
-  usr_password  String        @db.VarChar(150)
-  usr_createdAt DateTime?     @default(now()) @db.DateTime(0)
-  comments      comments[]
-  followers     friendships[] @relation("friendships_frd_usr_follower_idTousers")
-  followings    friendships[] @relation("friendships_frd_usr_following_idTousers")
-  posts         posts[]
-  profile       profile?
+  usr_id                                              Int           @id @default(autoincrement())
+  usr_user_name                                       String        @unique(map: "UK_users_usr_user_name") @db.VarChar(30)
+  usr_name                                            String        @db.VarChar(30)
+  usr_email                                           String        @unique(map: "UK_users_usr_email") @db.VarChar(255)
+  usr_password                                        String        @db.VarChar(150)
+  usr_createdAt                                       DateTime?     @default(now()) @db.DateTime(0)
+  comments                                            comments[]
+  friendships_friendships_frd_usr_follower_idTousers  friendships[] @relation("friendships_frd_usr_follower_idTousers")
+  friendships_friendships_frd_usr_following_idTousers friendships[] @relation("friendships_frd_usr_following_idTousers")
+  posts                                               posts[]
+  profile                                             profile?
 }

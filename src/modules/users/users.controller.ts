@@ -21,41 +21,31 @@ import { storage_profile_image } from '../config/multer.config';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Get('/:usr_user_name')
+  findByUserName(@Param('usr_user_name') usr_user_name: string) {
+    return this.usersService.findByUserName(usr_user_name);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @Get('/search/:search')
+  searchUser(@Param('search') search: string) {
+    return this.usersService.searchUser(search);
   }
 
-  @Get('/user_name/:user_name')
-  findByUUID(@Param('user_name') user_name: string) {
-    return this.usersService.findByUserName(user_name);
-  }
+  // @UseInterceptors(
+  //   FileInterceptor('profile_image', { storage: storage_profile_image }),
+  // )
+  // @Patch(':id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateUserDto: UpdateUserDto,
+  //   @UploadedFile()
+  //   file?: Express.Multer.File,
+  // ) {
+  //   return this.usersService.update(+id, updateUserDto, file);
+  // }
 
-  @Get('/search/:name')
-  searchUser(@Param('name') name: string) {
-    return this.usersService.searchUser(name);
-  }
-
-  @UseInterceptors(
-    FileInterceptor('profile_image', { storage: storage_profile_image }),
-  )
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-    @UploadedFile()
-    file?: Express.Multer.File,
-  ) {
-    return this.usersService.update(+id, updateUserDto, file);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.usersService.remove(+id);
+  // }
 }
