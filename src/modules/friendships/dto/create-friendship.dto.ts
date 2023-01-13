@@ -1,4 +1,4 @@
 export class CreateFriendshipDto {
-  followingId: number;
-  userId: number;
+  follower_user_name: string;
+  following_user_name: string;
 }

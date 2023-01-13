@@ -1,19 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcryptjs';
 import { validate } from 'isemail';
-import { Repository } from 'typeorm';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { User } from '../users/entities/user.entity';
 import { SigninUserDto } from './dto/signin-user.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
   ) {}
@@ -51,10 +46,10 @@ export class AuthService {
     const errors: IErrors = {
       isError: false,
       errors: {
-        usr_user_name: '',
-        usr_name: '',
-        usr_email: '',
-        usr_password: '',
+        usr_user_name: undefined,
+        usr_name: undefined,
+        usr_email: undefined,
+        usr_password: undefined,
       },
     };
 
@@ -127,7 +122,10 @@ export class AuthService {
 
     const errors: IErrors = {
       isError: false,
-      errors: { login: '', password: '' },
+      errors: {
+        login: undefined,
+        password: undefined,
+      },
     };
 
     if (!user) {

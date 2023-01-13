@@ -1,66 +1,34 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Post } from '../posts/entities/post.entity';
-import { Comment } from './entities/comment.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { Notification } from '../notifications/entities/notification.entity';
 
 @Injectable()
 export class CommentsService {
-  constructor(
-    @InjectRepository(Comment)
-    private readonly commentRepository: Repository<Comment>,
-    @InjectRepository(Post)
-    private readonly postRepository: Repository<Post>,
-    @InjectRepository(Notification)
-    private readonly notificationRepository: Repository<Notification>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createCommentDto: CreateCommentDto) {
-    const newComment = this.commentRepository.create(createCommentDto);
-    try {
-      return this.commentRepository.save(newComment);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
+    const results = await Promise.all([
+      this.prisma.users.findUnique({
+        where: { usr_user_name: createCommentDto.usr_user_name },
+      }),
+      this.prisma.posts.findUnique({
+        where: { pst_uuid: createCommentDto.pst_uuid },
+      }),
+    ]);
 
-  async findOne(id: number) {
-    const comment = await this.commentRepository.findOne({
-      where: { id },
-      relations: {
-        post: true,
-        user: true,
+    const user = results[0];
+    const post = results[1];
+
+    const comment = await this.prisma.comments.create({
+      data: {
+        cmt_uuid: uuidv4(),
+        cmt_content: createCommentDto.cmt_content,
+        cmt_pst_id: post.pst_id,
+        cmt_usr_id: user.usr_id,
       },
     });
 
-    if (!comment) throw new NotFoundException('Comentário não encontrado!');
-
     return comment;
-  }
-
-  async findAllCommentsByPostId(postUUID: string) {
-    const post = await this.postRepository.findOneBy({ uuid: postUUID });
-
-    if (!post) throw new NotFoundException('Post não encontrado!');
-
-    const comments = await this.commentRepository
-      .createQueryBuilder('comments')
-      .innerJoin('comments.post', 'post')
-      .where('post.uuid = :postUUID', { postUUID })
-      .innerJoinAndSelect('comments.user', 'user')
-      .orderBy('comments.id', 'ASC')
-      .getMany();
-
-    return comments;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
   }
 }

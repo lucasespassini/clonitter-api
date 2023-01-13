@@ -1,25 +1,11 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { Injectable } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Friendship } from '../friendships/entities/friendship.entity';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
   private secret = process.env.JWT_SECRET;
-  constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-    @InjectRepository(Friendship)
-    private friendRepository: Repository<Friendship>,
-    private prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findByUserName(usr_user_name: string) {
     const user = await this.prisma.users.findUnique({
@@ -27,7 +13,12 @@ export class UsersService {
         usr_user_name: true,
         usr_name: true,
         profile: {
-          select: { prf_image: true, prf_bio: true },
+          select: {
+            prf_image: true,
+            prf_bio: true,
+            prf_followers: true,
+            prf_followings: true,
+          },
         },
         posts: {
           select: { pst_uuid: true, pst_content: true, pst_createdAt: true },
@@ -39,19 +30,32 @@ export class UsersService {
     return user;
   }
 
-  async searchUser(name: string) {
-    return this.userRepository
-      .createQueryBuilder('users')
-      .where('users.user_name LIKE :name', { name: `%${name}%` })
-      .orWhere('users.name LIKE :name', { name: `${name}%` })
-      .select([
-        'users.id',
-        'users.profile_image',
-        'users.user_name',
-        'users.name',
-        'users.email',
-      ])
-      .getMany();
+  async searchUser(search: string) {
+    const users = await this.prisma.users.findMany({
+      select: {
+        usr_user_name: true,
+        usr_name: true,
+        profile: {
+          select: {
+            prf_image: true,
+            prf_bio: true,
+            prf_followers: true,
+            prf_followings: true,
+          },
+        },
+        posts: {
+          select: { pst_uuid: true, pst_content: true, pst_createdAt: true },
+        },
+      },
+      where: {
+        OR: [
+          { usr_user_name: { startsWith: search } },
+          { usr_name: { contains: search } },
+        ],
+      },
+    });
+
+    return users;
   }
 
   // async update(

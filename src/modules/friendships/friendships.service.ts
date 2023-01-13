@@ -1,61 +1,62 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateFriendshipDto } from './dto/create-friendship.dto';
-import { Friendship } from './entities/friendship.entity';
 
 @Injectable()
 export class FriendshipsService {
-  constructor(
-    @InjectRepository(Friendship)
-    private friendshipRepository: Repository<Friendship>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findUserById(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
-
-    if (!user) {
-      throw new NotFoundException(`User ${id} not found`);
-    }
-
-    return user;
+  async findUserByUserName(usr_user_name: string) {
+    return this.prisma.users.findUnique({
+      where: { usr_user_name },
+    });
   }
 
   async create(createFriendshipDto: CreateFriendshipDto) {
-    const newFriend = this.friendshipRepository.create(createFriendshipDto);
+    const results = await Promise.all([
+      this.findUserByUserName(createFriendshipDto.follower_user_name),
+      this.findUserByUserName(createFriendshipDto.following_user_name),
+    ]);
 
-    await this.findUserById(newFriend.followingId);
+    const followerUser = results[0];
+    const followingUser = results[1];
 
-    if (newFriend.followingId == newFriend.user) {
-      throw new BadRequestException();
-    }
-
-    const frindship = await this.friendshipRepository.save(newFriend);
-    return this.findOne(frindship.id);
-  }
-
-  async findOne(id: number) {
-    const friendship = await this.friendshipRepository.findOne({
-      where: { id },
-      relations: { user: true },
+    const friendship = await this.prisma.friendships.create({
+      data: {
+        frd_usr_follower_id: followerUser.usr_id,
+        frd_usr_following_id: followingUser.usr_id,
+      },
     });
-
-    if (!friendship) {
-      throw new NotFoundException();
-    }
 
     return friendship;
   }
 
-  async remove(id: number) {
-    const friendship = await this.findOne(id);
-    return this.friendshipRepository.remove(friendship);
+  async remove(createFriendshipDto: CreateFriendshipDto) {
+    const results = await Promise.all([
+      this.findUserByUserName(createFriendshipDto.follower_user_name),
+      this.findUserByUserName(createFriendshipDto.following_user_name),
+    ]);
+
+    const followerUser = results[0];
+    const followingUser = results[1];
+
+    const friendship = await this.prisma.friendships.findFirst({
+      where: {
+        AND: [
+          { frd_usr_follower_id: followerUser.usr_id },
+          { frd_usr_following_id: followingUser.usr_id },
+        ],
+      },
+    });
+
+    if (!friendship) {
+      return { message: 'amizade não encontrada' };
+    }
+
+    return this.prisma.friendships.delete({
+      where: {
+        frd_id: friendship.frd_id,
+      },
+    });
   }
 }

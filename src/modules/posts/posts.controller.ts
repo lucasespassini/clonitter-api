@@ -23,38 +23,25 @@ export class PostsController {
     return this.postsService.create(createPostDto);
   }
 
-  @Get()
-  findAll() {
-    return this.postsService.findAll();
+  @Get('/:pst_uuid')
+  findOneByUUID(@Param('pst_uuid') pst_uuid: string) {
+    return this.postsService.findOneByUUID(pst_uuid);
   }
 
-  @Get('/uuid/:uuid')
-  findOneByUUID(@Param('uuid') uuid: string) {
-    return this.postsService.findOneByUUID(uuid);
+  @Get('user/:usr_user_name/followings')
+  findAllFollowingPostsByUserName(
+    @Param('usr_user_name') usr_user_name: string,
+  ) {
+    return this.postsService.findAllFollowingPostsByUserName(usr_user_name);
   }
 
-  @Get('user/:id')
-  findAllPostsByUserId(@Param('id') id: string) {
-    return this.postsService.findAllPostsByUserId(+id);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
+  //   return this.postsService.update(+id, updatePostDto);
+  // }
 
-  @Get('user/:id/following')
-  findAllPostsFromFriends(@Param('id') id: string) {
-    return this.postsService.findAllFriendPosts(+id);
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(+id, updatePostDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.postsService.remove(+id);
+  // }
 }

@@ -1,12 +1,5 @@
-import { IsNotEmpty } from 'class-validator';
-
 export class CreateCommentDto {
-  @IsNotEmpty({ message: 'Digite algo para postar!' })
-  content: string;
-
-  @IsNotEmpty({ message: 'Usuário inválido!' })
-  userId: string;
-
-  @IsNotEmpty({ message: 'Post inválido!' })
-  postId: string;
+  cmt_content: string;
+  pst_uuid: string;
+  usr_user_name: string;
 }

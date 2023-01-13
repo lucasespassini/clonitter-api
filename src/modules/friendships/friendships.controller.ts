@@ -20,8 +20,8 @@ export class FriendshipsController {
     return this.friendshipsService.create(createFriendshipDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.friendshipsService.remove(+id);
+  @Delete()
+  remove(@Body() createFriendshipDto: CreateFriendshipDto) {
+    return this.friendshipsService.remove(createFriendshipDto);
   }
 }

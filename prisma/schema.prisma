@@ -9,16 +9,16 @@ datasource db {
 
 model comments {
   cmt_id        Int       @id @default(autoincrement())
-  cmt_pst_id    Int
   cmt_usr_id    Int
-  cmt_uuid      String    @db.VarChar(255)
+  cmt_pst_id    Int
+  cmt_uuid      String    @db.VarChar(150)
   cmt_content   String    @db.VarChar(255)
   cmt_createdAt DateTime? @default(now()) @db.DateTime(0)
-  posts         posts     @relation(fields: [cmt_pst_id], references: [pst_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_comments_cmt_pst_id")
-  users         users     @relation(fields: [cmt_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_comments_cmt_usr_id")
+  posts         posts     @relation(fields: [cmt_pst_id], references: [pst_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_comments_cmt_pst_id")
+  users         users     @relation(fields: [cmt_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_comments_cmt_usr_id")
 
-  @@index([cmt_pst_id], map: "FK_comments_cmt_pst_id")
-  @@index([cmt_usr_id], map: "FK_comments_cmt_usr_id")
+  @@index([cmt_pst_id], map: "FK_cmt_pst_id")
+  @@index([cmt_usr_id], map: "FK_cmt_usr_id")
 }
 
 model friendships {
@@ -26,23 +26,23 @@ model friendships {
   frd_usr_follower_id                           Int
   frd_usr_following_id                          Int
   frd_createdAt                                 DateTime? @default(now()) @db.DateTime(0)
-  users_friendships_frd_usr_follower_idTousers  users     @relation("friendships_frd_usr_follower_idTousers", fields: [frd_usr_follower_id], references: [usr_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_friendships_frd_usr_follower_id")
-  users_friendships_frd_usr_following_idTousers users     @relation("friendships_frd_usr_following_idTousers", fields: [frd_usr_following_id], references: [usr_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_friendships_frd_usr_following_id")
+  users_friendships_frd_usr_follower_idTousers  users     @relation("friendships_frd_usr_follower_idTousers", fields: [frd_usr_follower_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_friendships_frd_usr_follower_id")
+  users_friendships_frd_usr_following_idTousers users     @relation("friendships_frd_usr_following_idTousers", fields: [frd_usr_following_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_friendships_frd_usr_following_id")
 
-  @@index([frd_usr_follower_id], map: "FK_friendships_frd_usr_follower_id")
-  @@index([frd_usr_following_id], map: "FK_friendships_frd_usr_following_id")
+  @@index([frd_usr_follower_id], map: "FK_frd_usr_follower_id")
+  @@index([frd_usr_following_id], map: "FK_frd_usr_following_id")
 }
 
 model posts {
   pst_id        Int        @id @default(autoincrement())
   pst_usr_id    Int
-  pst_uuid      String     @db.VarChar(255)
+  pst_uuid      String     @unique(map: "UK_posts_pst_uuid") @db.VarChar(255)
   pst_content   String     @db.VarChar(255)
   pst_createdAt DateTime?  @default(now()) @db.DateTime(0)
   comments      comments[]
-  users         users      @relation(fields: [pst_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_posts_pst_usr_id")
+  users         users      @relation(fields: [pst_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_posts_pst_usr_id")
 
-  @@index([pst_usr_id], map: "FK_posts_pst_usr_id")
+  @@index([pst_usr_id], map: "FK_pst_usr_id")
 }
 
 model profile {
@@ -50,8 +50,8 @@ model profile {
   prf_usr_id     Int     @unique(map: "UK_profile_prf_usr_id")
   prf_image      String? @unique(map: "UK_profile_prf_image") @db.VarChar(255)
   prf_bio        String? @db.VarChar(255)
-  prf_followers  Int     @db.Int()
-  prf_followings Int     @db.Int()
+  prf_followers  Int?    @default(0)
+  prf_followings Int?    @default(0)
   users          users   @relation(fields: [prf_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_prf_usr_id")
 }
 

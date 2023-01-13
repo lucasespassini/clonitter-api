@@ -1,9 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
-
 export class CreatePostDto {
-  @IsNotEmpty({ message: 'Digite algo para postar!' })
-  content: string;
-
-  @IsNotEmpty({ message: 'Usuário inválido!' })
-  userId: string;
+  pst_content: string;
+  usr_user_name: string;
 }
